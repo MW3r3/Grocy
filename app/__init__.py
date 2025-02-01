@@ -1,19 +1,22 @@
-import os
+"""
+Initialization module for the Flask application.
+"""
+
 from flask import Flask
-from .models import db
+from flask_sqlalchemy import SQLAlchemy
+
+
+db = SQLAlchemy()
 
 def create_app():
+    """
+    Create and configure the Flask application.
+    """
     app = Flask(__name__)
-    
-    basedir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    app.config['SECRET_KEY'] = 'your_secret_key'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'data', 'site.db')
-    # Optional: disable track modifications to suppress FSADeprecationWarning
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
     db.init_app(app)
-    
+
     with app.app_context():
-        from . import routes
+        db.create_all()
 
     return app

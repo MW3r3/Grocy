@@ -20,3 +20,6 @@ test:
 update-requirements:
 	@echo "Updating requirements.txt..."
 	. .venv/bin/activate && pip3 freeze > requirements.txt
+
+lint:
+	pylint app/

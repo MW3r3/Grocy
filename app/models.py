@@ -1,11 +1,17 @@
+"""
+Models module for the Flask application.
+"""
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
-from datetime import datetime
 from thefuzz import fuzz
 
 db = SQLAlchemy()
 
 class Item(db.Model):
+    """
+    Model for items in the database.
+    """
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
@@ -51,6 +57,7 @@ class Item(db.Model):
 
     @classmethod
     def delete(cls, item_id):
+        """Delete an item by id."""
         item = cls.get_by_id(item_id)
         if item:
             db.session.delete(item)
@@ -59,6 +66,7 @@ class Item(db.Model):
 
     @classmethod
     def search_by_name(cls, search_term):
+        """Search for items by name."""
         return (
             cls.query.filter(cls.name.ilike(f"%{search_term}%"))
             .order_by(func.length(cls.name))
@@ -66,7 +74,8 @@ class Item(db.Model):
         )
 
     @classmethod
-    def fuzzy_search_by_name(cls, search_term, threshold=60, limit=10):     
+    def fuzzy_search_by_name(cls, search_term, threshold=60, limit=10):
+        """Fuzzy search for items by name."""
         prefilter = search_term[:2] if len(search_term) >= 2 else search_term
         candidates = cls.query.filter(cls.name.ilike(f"%{prefilter}%")).all()  # Loose prefilter
         ranked_items = []
@@ -76,5 +85,3 @@ class Item(db.Model):
                 ranked_items.append((item, score))
         ranked_items.sort(key=lambda x: x[1], reverse=True)
         return [item for item, score in ranked_items][:limit]
-
-
