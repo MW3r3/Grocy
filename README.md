@@ -6,10 +6,11 @@ Grocy is a Flask application designed to scrape discount booklets from grocery s
 
 ## Features
 
-- Scrapes discount booklets from Lidl (functioning) and Maxima (to be implemented)
-- Uses OCR to extract individual items and their discounts
-- Stores data in a SQLite database
-- Displays the cheapest prices for items across different markets
+- Scrapes and downloads discount booklets from Lidl (functioning)
+- Main database schema for storing data
+- Uses OCR to extract individual items and their discounts (to be implemented)
+- Scrapes discount booklets from Maxima (to be implemented)
+- Displays the cheapest prices for items across different markets (to be implemented)
 - Easy setup and configuration
 
 ## Installation
@@ -55,7 +56,7 @@ Visit `http://127.0.0.1:5000` in your web browser to access the application.
 
 ## Scraping PDFs
 
-To download PDF files from Lidl and Maxima, run the following script:
+To download PDF files from Lidl, run the following script:
 ```
 python app/scraper.py
 ```
@@ -74,16 +75,15 @@ A Makefile is provided to simplify common tasks. You can use the following comma
   make run
   ```
 
-- Reset the database
+- Reset the database:
   ```
   make reset-db
   ```
 
-- Initialize tests
+- Initialize tests:
   ```
   make test
   ```
-
 
 ## Contributing
 
