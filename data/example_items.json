@@ -1,0 +1,544 @@
+{
+    "items": [
+      {
+        "name": "Banana",
+        "price": 0.99,
+        "quantity": 120,
+        "discount": 0.1,
+        "vendor": "Fresh Fruits Inc.",
+        "category": "Fruits",
+        "deadline": "2023-12-31T00:00:00",
+        "unit": "kg"
+      },
+      {
+        "name": "Apple",
+        "price": 1.29,
+        "quantity": 100,
+        "discount": 0.05,
+        "vendor": "Orchard Supplies",
+        "category": "Fruits",
+        "deadline": "2023-11-30T00:00:00",
+        "unit": "kg"
+      },
+      {
+        "name": "Orange",
+        "price": 0.89,
+        "quantity": 80,
+        "discount": 0.0,
+        "vendor": "Citrus World",
+        "category": "Fruits",
+        "deadline": "2023-10-15T00:00:00",
+        "unit": "kg"
+      },
+      {
+        "name": "Mango",
+        "price": 1.99,
+        "quantity": 50,
+        "discount": 0.15,
+        "vendor": "Tropical Goods",
+        "category": "Fruits",
+        "deadline": "2024-01-05T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Pineapple",
+        "price": 2.49,
+        "quantity": 30,
+        "discount": 0.0,
+        "vendor": "Exotic Imports",
+        "category": "Fruits",
+        "deadline": "2023-12-15T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Grapes",
+        "price": 2.99,
+        "quantity": 70,
+        "discount": 0.1,
+        "vendor": "Vineyard Co.",
+        "category": "Fruits",
+        "deadline": "2023-11-10T00:00:00",
+        "unit": "kg"
+      },
+      {
+        "name": "Strawberry",
+        "price": 3.49,
+        "quantity": 90,
+        "discount": 0.2,
+        "vendor": "Berry Best",
+        "category": "Fruits",
+        "deadline": "2023-09-30T00:00:00",
+        "unit": "box"
+      },
+      {
+        "name": "Blueberry",
+        "price": 4.99,
+        "quantity": 60,
+        "discount": 0.15,
+        "vendor": "Berry Best",
+        "category": "Fruits",
+        "deadline": "2023-09-25T00:00:00",
+        "unit": "box"
+      },
+      {
+        "name": "Raspberry",
+        "price": 5.49,
+        "quantity": 40,
+        "discount": 0.05,
+        "vendor": "Berry Best",
+        "category": "Fruits",
+        "deadline": "2023-10-05T00:00:00",
+        "unit": "box"
+      },
+      {
+        "name": "Papaya",
+        "price": 1.79,
+        "quantity": 45,
+        "discount": 0.0,
+        "vendor": "Tropical Goods",
+        "category": "Fruits",
+        "deadline": "2023-12-01T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Peach",
+        "price": 1.49,
+        "quantity": 55,
+        "discount": 0.0,
+        "vendor": "Orchard Supplies",
+        "category": "Fruits",
+        "deadline": "2023-10-20T00:00:00",
+        "unit": "kg"
+      },
+      {
+        "name": "Plum",
+        "price": 1.39,
+        "quantity": 65,
+        "discount": 0.05,
+        "vendor": "Orchard Supplies",
+        "category": "Fruits",
+        "deadline": "2023-11-05T00:00:00",
+        "unit": "kg"
+      },
+      {
+        "name": "Cherry",
+        "price": 3.99,
+        "quantity": 35,
+        "discount": 0.1,
+        "vendor": "Cherry Orchard",
+        "category": "Fruits",
+        "deadline": "2023-09-15T00:00:00",
+        "unit": "box"
+      },
+      {
+        "name": "Watermelon",
+        "price": 4.29,
+        "quantity": 25,
+        "discount": 0.0,
+        "vendor": "Fresh Fruits Inc.",
+        "category": "Fruits",
+        "deadline": "2023-08-31T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Kiwi",
+        "price": 0.79,
+        "quantity": 75,
+        "discount": 0.0,
+        "vendor": "Exotic Imports",
+        "category": "Fruits",
+        "deadline": "2023-11-15T00:00:00",
+        "unit": "kg"
+      },
+      {
+        "name": "Lemon",
+        "price": 0.59,
+        "quantity": 80,
+        "discount": 0.05,
+        "vendor": "Citrus World",
+        "category": "Fruits",
+        "deadline": "2023-12-05T00:00:00",
+        "unit": "kg"
+      },
+      {
+        "name": "Lime",
+        "price": 0.69,
+        "quantity": 85,
+        "discount": 0.05,
+        "vendor": "Citrus World",
+        "category": "Fruits",
+        "deadline": "2023-12-05T00:00:00",
+        "unit": "kg"
+      },
+      {
+        "name": "Avocado",
+        "price": 1.99,
+        "quantity": 45,
+        "discount": 0.1,
+        "vendor": "Exotic Imports",
+        "category": "Fruits",
+        "deadline": "2023-10-10T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Cantaloupe",
+        "price": 3.19,
+        "quantity": 30,
+        "discount": 0.0,
+        "vendor": "Fresh Fruits Inc.",
+        "category": "Fruits",
+        "deadline": "2023-09-20T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Honeydew",
+        "price": 3.29,
+        "quantity": 40,
+        "discount": 0.0,
+        "vendor": "Fresh Fruits Inc.",
+        "category": "Fruits",
+        "deadline": "2023-09-22T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Strawberry Jam",
+        "price": 2.99,
+        "quantity": 50,
+        "discount": 0.2,
+        "vendor": "Berry Best",
+        "category": "Spreads",
+        "deadline": "2024-02-01T00:00:00",
+        "unit": "jar"
+      },
+      {
+        "name": "Apple Butter",
+        "price": 2.49,
+        "quantity": 60,
+        "discount": 0.15,
+        "vendor": "Orchard Supplies",
+        "category": "Spreads",
+        "deadline": "2024-01-15T00:00:00",
+        "unit": "jar"
+      },
+      {
+        "name": "Peach Preserves",
+        "price": 2.69,
+        "quantity": 55,
+        "discount": 0.1,
+        "vendor": "Orchard Supplies",
+        "category": "Spreads",
+        "deadline": "2024-01-20T00:00:00",
+        "unit": "jar"
+      },
+      {
+        "name": "Blueberry Muffin",
+        "price": 1.99,
+        "quantity": 100,
+        "discount": 0.0,
+        "vendor": "Bakery Delight",
+        "category": "Bakery",
+        "deadline": "2023-12-01T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Chocolate Chip Cookie",
+        "price": 0.99,
+        "quantity": 200,
+        "discount": 0.05,
+        "vendor": "Bakery Delight",
+        "category": "Bakery",
+        "deadline": "2023-12-15T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Croissant",
+        "price": 1.49,
+        "quantity": 150,
+        "discount": 0.0,
+        "vendor": "Bakery Delight",
+        "category": "Bakery",
+        "deadline": "2023-10-10T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Baguette",
+        "price": 1.99,
+        "quantity": 80,
+        "discount": 0.05,
+        "vendor": "French Bakery Co.",
+        "category": "Bakery",
+        "deadline": "2023-11-01T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Whole Wheat Bread",
+        "price": 2.49,
+        "quantity": 90,
+        "discount": 0.1,
+        "vendor": "Healthy Bakehouse",
+        "category": "Bakery",
+        "deadline": "2023-11-12T00:00:00",
+        "unit": "loaf"
+      },
+      {
+        "name": "Bagel",
+        "price": 0.89,
+        "quantity": 120,
+        "discount": 0.0,
+        "vendor": "Healthy Bakehouse",
+        "category": "Bakery",
+        "deadline": "2023-11-20T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Pumpernickel Bread",
+        "price": 2.79,
+        "quantity": 70,
+        "discount": 0.0,
+        "vendor": "Healthy Bakehouse",
+        "category": "Bakery",
+        "deadline": "2023-12-05T00:00:00",
+        "unit": "loaf"
+      },
+      {
+        "name": "Almond Croissant",
+        "price": 2.19,
+        "quantity": 85,
+        "discount": 0.05,
+        "vendor": "Bakery Delight",
+        "category": "Bakery",
+        "deadline": "2023-12-08T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Oatmeal Cookie",
+        "price": 0.79,
+        "quantity": 210,
+        "discount": 0.1,
+        "vendor": "Healthy Bakehouse",
+        "category": "Bakery",
+        "deadline": "2023-12-20T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Granola Bar",
+        "price": 1.19,
+        "quantity": 250,
+        "discount": 0.0,
+        "vendor": "Snack Masters",
+        "category": "Snacks",
+        "deadline": "2024-03-01T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Mixed Nuts",
+        "price": 3.99,
+        "quantity": 130,
+        "discount": 0.15,
+        "vendor": "Nut House",
+        "category": "Snacks",
+        "deadline": "2024-02-15T00:00:00",
+        "unit": "pack"
+      },
+      {
+        "name": "Potato Chips",
+        "price": 1.49,
+        "quantity": 300,
+        "discount": 0.05,
+        "vendor": "Snack Masters",
+        "category": "Snacks",
+        "deadline": "2024-01-10T00:00:00",
+        "unit": "bag"
+      },
+      {
+        "name": "Pretzels",
+        "price": 0.99,
+        "quantity": 280,
+        "discount": 0.0,
+        "vendor": "Snack Masters",
+        "category": "Snacks",
+        "deadline": "2024-01-05T00:00:00",
+        "unit": "bag"
+      },
+      {
+        "name": "Energy Bar",
+        "price": 1.29,
+        "quantity": 220,
+        "discount": 0.1,
+        "vendor": "Healthy Snacks Co.",
+        "category": "Snacks",
+        "deadline": "2024-02-20T00:00:00",
+        "unit": "pcs"
+      },
+      {
+        "name": "Yogurt",
+        "price": 0.99,
+        "quantity": 200,
+        "discount": 0.0,
+        "vendor": "Dairy Best",
+        "category": "Dairy",
+        "deadline": "2023-10-25T00:00:00",
+        "unit": "cup"
+      },
+      {
+        "name": "Cheddar Cheese",
+        "price": 3.49,
+        "quantity": 100,
+        "discount": 0.05,
+        "vendor": "Dairy Best",
+        "category": "Dairy",
+        "deadline": "2023-11-30T00:00:00",
+        "unit": "block"
+      },
+      {
+        "name": "Milk",
+        "price": 1.09,
+        "quantity": 150,
+        "discount": 0.0,
+        "vendor": "Dairy Best",
+        "category": "Dairy",
+        "deadline": "2023-10-20T00:00:00",
+        "unit": "liter"
+      },
+      {
+        "name": "Greek Yogurt",
+        "price": 1.49,
+        "quantity": 180,
+        "discount": 0.1,
+        "vendor": "Dairy Best",
+        "category": "Dairy",
+        "deadline": "2023-10-30T00:00:00",
+        "unit": "cup"
+      },
+      {
+        "name": "Butter",
+        "price": 2.19,
+        "quantity": 90,
+        "discount": 0.0,
+        "vendor": "Dairy Best",
+        "category": "Dairy",
+        "deadline": "2023-11-10T00:00:00",
+        "unit": "pack"
+      },
+      {
+        "name": "Eggs",
+        "price": 2.99,
+        "quantity": 240,
+        "discount": 0.0,
+        "vendor": "Farm Fresh",
+        "category": "Dairy",
+        "deadline": "2023-10-15T00:00:00",
+        "unit": "dozen"
+      },
+      {
+        "name": "Black Tea",
+        "price": 3.19,
+        "quantity": 130,
+        "discount": 0.0,
+        "vendor": "Tea Time",
+        "category": "Beverages",
+        "deadline": "2024-04-01T00:00:00",
+        "unit": "box"
+      },
+      {
+        "name": "Green Tea",
+        "price": 3.49,
+        "quantity": 125,
+        "discount": 0.05,
+        "vendor": "Tea Time",
+        "category": "Beverages",
+        "deadline": "2024-04-05T00:00:00",
+        "unit": "box"
+      },
+      {
+        "name": "Coffee",
+        "price": 5.99,
+        "quantity": 100,
+        "discount": 0.1,
+        "vendor": "Coffee Co.",
+        "category": "Beverages",
+        "deadline": "2024-03-15T00:00:00",
+        "unit": "pack"
+      },
+      {
+        "name": "Orange Juice",
+        "price": 2.49,
+        "quantity": 180,
+        "discount": 0.0,
+        "vendor": "Juice World",
+        "category": "Beverages",
+        "deadline": "2023-10-10T00:00:00",
+        "unit": "liter"
+      },
+      {
+        "name": "Apple Juice",
+        "price": 2.29,
+        "quantity": 190,
+        "discount": 0.05,
+        "vendor": "Juice World",
+        "category": "Beverages",
+        "deadline": "2023-10-15T00:00:00",
+        "unit": "liter"
+      },
+      {
+        "name": "Grape Juice",
+        "price": 2.79,
+        "quantity": 160,
+        "discount": 0.05,
+        "vendor": "Juice World",
+        "category": "Beverages",
+        "deadline": "2023-11-05T00:00:00",
+        "unit": "liter"
+      },
+      {
+        "name": "Tomato Juice",
+        "price": 2.19,
+        "quantity": 140,
+        "discount": 0.0,
+        "vendor": "Juice World",
+        "category": "Beverages",
+        "deadline": "2023-10-20T00:00:00",
+        "unit": "liter"
+      },
+      {
+        "name": "Carrot Juice",
+        "price": 2.39,
+        "quantity": 150,
+        "discount": 0.0,
+        "vendor": "Juice World",
+        "category": "Beverages",
+        "deadline": "2023-10-25T00:00:00",
+        "unit": "liter"
+      },
+      {
+        "name": "Herbal Tea",
+        "price": 3.29,
+        "quantity": 115,
+        "discount": 0.0,
+        "vendor": "Tea Time",
+        "category": "Beverages",
+        "deadline": "2024-04-10T00:00:00",
+        "unit": "box"
+      },
+      {
+        "name": "Mint Tea",
+        "price": 3.19,
+        "quantity": 110,
+        "discount": 0.0,
+        "vendor": "Tea Time",
+        "category": "Beverages",
+        "deadline": "2024-04-12T00:00:00",
+        "unit": "box"
+      },
+      {
+        "name": "Espresso",
+        "price": 4.49,
+        "quantity": 95,
+        "discount": 0.1,
+        "vendor": "Coffee Co.",
+        "category": "Beverages",
+        "deadline": "2024-03-18T00:00:00",
+        "unit": "pack"
+      }
+    ]
+  }
