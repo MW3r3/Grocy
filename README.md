@@ -85,6 +85,13 @@ A Makefile is provided to simplify common tasks. You can use the following comma
   make test
   ```
 
+## Configuring Pylint
+
+To get rid of `E1101` errors for SQLAlchemy dynamic attributes, you can run Pylint with the following options:
+```
+pylint --ignored-classes=SQLAlchemy,scoped_session --generated-members=Column,Integer,String,Float,DateTime,add,commit,delete app/models.py
+```
+
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or features.
