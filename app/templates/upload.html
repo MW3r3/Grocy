@@ -1,14 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Upload PDF</title>
-</head>
-<body>
-    <h1>Upload Discount Booklet PDF</h1>
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" accept="application/pdf" required>
-        <button type="submit">Upload</button>
-    </form>
-</body>
-</html>
+<!-- app/templates/upload.html -->
+{% extends "base.html" %}
+
+{% block title %}Upload PDF{% endblock %}
+
+{% block content %}
+<h2>Upload Discount Booklet PDF</h2>
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" accept="application/pdf" required>
+    <button type="submit">Upload</button>
+</form>
+{% endblock %}

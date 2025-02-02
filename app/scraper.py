@@ -105,7 +105,7 @@ def download_pdfs_from_lidl(download_dir: str):
                             )
                         )
                         download_link.click()
-
+                        time.sleep(4)
                     except TimeoutException as e:
                         logger.error(
                             "Download link not found in the sidebar on %s: %s", flyer_url, e
@@ -121,7 +121,7 @@ def download_pdfs_from_lidl(download_dir: str):
     except WebDriverException as e:
         logger.error("Error accessing %s: %s", url, e)
     finally:
-        time.sleep(10)
+        
         driver.quit()
 
 def download_pdfs_from_maxima(download_dir: str):

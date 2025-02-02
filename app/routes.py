@@ -2,9 +2,10 @@
 Routes module for the Flask application.
 """
 
+import os
 from flask import Blueprint, render_template, request, redirect, url_for
 from .models import db, Item
-from .scraper import download_pdfs_from_lidl
+from .scraper import download_pdfs_from_lidl, download_pdfs_from_maxima
 
 main = Blueprint("main", __name__)
 
@@ -23,10 +24,12 @@ def add():
     """
     name = request.form["name"]
     price = request.form["price"]
+    quantity = request.form["quantity"]
     discount = request.form["discount"]
-    store = request.form["store"]
+    vendor = request.form["vendor"]
     category = request.form["category"]
-    item = Item(name=name, price=price, discount=discount, vendor=store, category=category)
+    unit = request.form["unit"]
+    item = Item(name=name, price=price, quantity=quantity, discount=discount, vendor=vendor, category=category, unit=unit)
     db.session.add(item)
     db.session.commit()
     return redirect(url_for("main.index"))
@@ -42,10 +45,26 @@ def delete(item_id):
         db.session.commit()
     return redirect(url_for("main.index"))
 
+@main.route("/upload", methods=["GET", "POST"])
+def upload():
+    """
+    Route for uploading PDFs.
+    """
+    if request.method == "POST":
+        file = request.files["file"]
+        if file:
+            file_path = os.path.join("uploads", file.filename)
+            file.save(file_path)
+            # Placeholder for processing the uploaded PDF
+            # process_pdf(file_path)
+            return redirect(url_for("main.index"))
+    return render_template("upload.html")
+
 @main.route("/scrape")
 def scrape():
     """
     Route for scraping PDFs.
     """
     download_pdfs_from_lidl("downloads")
+    download_pdfs_from_maxima("downloads")
     return redirect(url_for("main.index"))

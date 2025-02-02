@@ -12,6 +12,7 @@ build/
 develop-eggs/
 dist/
 downloads/
+data/site.db
 eggs/
 .eggs/
 lib/

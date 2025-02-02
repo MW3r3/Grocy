@@ -16,14 +16,21 @@ def populate_items_from_json():
 
 @pytest.fixture(scope="module")
 def test_app():
-    app = create_app()
-    app.config["TESTING"] = True
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+    config = {
+        "TESTING": True,
+        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
+        "SQLALCHEMY_TRACK_MODIFICATIONS": False
+    }
+    app = create_app(config)
     with app.app_context():
         db.create_all()
         yield app
         db.session.remove()
         db.drop_all()
+
+@pytest.fixture(scope="module")
+def test_client(test_app):
+    return test_app.test_client()
 
 def test_create_item(test_app):
     item = Item.create(name="TestItem", price=9.99, quantity=5)
@@ -61,7 +68,6 @@ def test_search_by_name(test_app):
     assert any("Apple" in name for name in names)
 
 def test_fuzzy_search(test_app):
-
     for item in Item.get_all():
         Item.delete(item.id)
     populate_items_from_json()

@@ -1,0 +1,66 @@
+<!-- app/templates/index.html -->
+{% extends "base.html" %}
+
+{% block title %}Grocy - Home{% endblock %}
+
+{% block content %}
+<h2>Items</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Discount</th>
+            <th>Vendor</th>
+            <th>Category</th>
+            <th>Unit</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.price }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.discount }}</td>
+            <td>{{ item.vendor }}</td>
+            <td>{{ item.category }}</td>
+            <td>{{ item.unit }}</td>
+            <td>
+                <a href="{{ url_for('main.delete', item_id=item.id) }}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Add New Item</h2>
+<form method="POST" action="{{ url_for('main.add') }}">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required>
+    <label for="price">Price:</label>
+    <input type="number" step="0.01" id="price" name="price" required>
+    <label for="quantity">Quantity:</label>
+    <input type="number" id="quantity" name="quantity" required>
+    <label for="discount">Discount:</label>
+    <input type="number" step="0.01" id="discount" name="discount">
+    <label for="vendor">Vendor:</label>
+    <input type="text" id="vendor" name="vendor">
+    <label for="category">Category:</label>
+    <input type="text" id="category" name="category">
+    <label for="unit">Unit:</label>
+    <input type="text" id="unit" name="unit">
+    <button type="submit">Add Item</button>
+</form>
+
+<h2>Upload Discount Booklet PDF</h2>
+<form method="POST" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
+    <input type="file" name="file" accept="application/pdf" required>
+    <button type="submit">Upload</button>
+</form>
+
+<h2>Scrape PDFs</h2>
+<a href="{{ url_for('main.scrape') }}">Scrape PDFs from Lidl and Maxima</a>
+{% endblock %}
