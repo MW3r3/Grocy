@@ -44,15 +44,29 @@ def parse_maxima_sales():
         if item.find('div', class_='discount percents'):
             continue
 
+        product_id = item.get('data-product-id')
+        
+        # Check if the item already exists in the database
+        existing_item = Item.query.filter_by(product_id=product_id).first()
+        if existing_item:
+            logger.info("Item with product_id %s already exists, skipping.", product_id)
+            continue
+
         title = item.find('div', class_='title').text.strip()
 
         # Extract unit and quantity from the title
         quantity = None
         unit = None
-        match = re.search(r'(\d+)\s*(g|kg|ml|l|pcs)', title, re.IGNORECASE)
+        match = re.search(r'(\d+)\s*(gab.|kg|ml|l|g)', title, re.IGNORECASE)
         if match:
             quantity = int(match.group(1))
             unit = match.group(2).lower()
+            if unit == 'kg':
+                quantity *= 1000
+                unit = 'g'
+            elif unit == 'l':
+                quantity *= 1000
+                unit = 'ml'
 
         price_element = item.find('div', class_='t1')
         if price_element:
@@ -89,7 +103,8 @@ def parse_maxima_sales():
             discount=discount,
             vendor='Maxima',
             deadline=valid_to,
-            category=category
+            category=category,
+            product_id=product_id
         )
         db.session.add(new_item)
 
