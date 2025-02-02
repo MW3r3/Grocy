@@ -5,7 +5,7 @@ Routes module for the Flask application.
 import os
 from flask import Blueprint, render_template, request, redirect, url_for
 from .models import db, Item
-from .scraper import download_pdfs_from_lidl, download_pdfs_from_maxima
+from .scraper import download_pdfs_from_lidl, parse_maxima_sales
 
 main = Blueprint("main", __name__)
 
@@ -29,7 +29,8 @@ def add():
     vendor = request.form["vendor"]
     category = request.form["category"]
     unit = request.form["unit"]
-    item = Item(name=name, price=price, quantity=quantity, discount=discount, vendor=vendor, category=category, unit=unit)
+    item = Item(name=name, price=price, quantity=quantity,
+                discount=discount,vendor=vendor, category=category, unit=unit)
     db.session.add(item)
     db.session.commit()
     return redirect(url_for("main.index"))
@@ -65,6 +66,6 @@ def scrape():
     """
     Route for scraping PDFs.
     """
-    download_pdfs_from_lidl("downloads")
-    download_pdfs_from_maxima("downloads")
+    #download_pdfs_from_lidl("downloads")
+    parse_maxima_sales()
     return redirect(url_for("main.index"))

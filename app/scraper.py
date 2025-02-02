@@ -11,6 +11,12 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException, TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import requests
+from bs4 import BeautifulSoup
+import sqlite3
+from flask_sqlalchemy import SQLAlchemy
+from app.models import db, Item
+from datetime import datetime
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -121,69 +127,67 @@ def download_pdfs_from_lidl(download_dir: str):
     except WebDriverException as e:
         logger.error("Error accessing %s: %s", url, e)
     finally:
+        driver.quit()
+
+def parse_maxima_sales():
+    """
+    Parses sales data from maxima.lv and inserts it into the database.
+    """
+    url = "https://www.maxima.lv/ajax/salesloadmore?sort_by=newest&limit=150&search="
+    response = requests.get(url)
+    if response.status_code != 200:
+        logger.error("Failed to fetch data from %s", url)
+        return
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+    items = soup.find_all('div', class_='item')
+
+    for item in items:
         
-        driver.quit()
+        if 'offer-2-l-pd-sku-lidz' in item.get('class', []):
+            continue
 
-def download_pdfs_from_maxima(download_dir: str):
-    """
-    Downloads PDF files from maxima.lv using Selenium.
+        if item.find('div', class_='discount percents'):
+            continue
 
-    Args:
-        download_dir (str): Directory where the PDFs will be saved.
-    """
-    url = "https://www.maxima.lv/"
-    try:
-        chrome_options = Options()
-        prefs = {
-            "download.default_directory": download_dir,
-            "plugins.always_open_pdf_externally": True
-        }
-        chrome_options.add_experimental_option("prefs", prefs)
-        chrome_options.add_argument("--disable-extensions")
-        chrome_options.add_argument("--disable-popup-blocking")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--remote-debugging-port=9222")
+        title = item.find('div', class_='title').text.strip()
 
-        driver = webdriver.Chrome(options=chrome_options)
-        driver.get(url)
+        price_element = item.find('div', class_='t1')
+        if price_element:
+            value = price_element.find('span', class_='value').text.strip()
+            cents = price_element.find('span', class_='cents').text.strip()
+            price = float(f"{value}.{cents}")
+        else:
+            price = 0.0
+        
+        old_price_element = item.find('div', class_='t2')
+        if old_price_element:
+            old_price_text = old_price_element.find('span', class_='value').text.strip()
+            old_price = float(old_price_text.replace(',', '.'))
+            discount = round((old_price - price) / old_price * 100)
+        else:
+            discount = 0.0
 
-        # Accept cookies if the button is present
-        try:
-            accept_cookies_button = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, "//button[contains(text(), 'PIEKRĪTU')]")
-                    ))
-            accept_cookies_button.click()
-        except TimeoutException:
-            logger.info("No cookies acceptance button found.")
+        dates_interval = item.get('data-dates-interval')
+        if dates_interval:
+            end_date_str = dates_interval.split(' - ')[1].strip('.')
+            valid_to = datetime.strptime(end_date_str, '%d.%m.%Y')
+        else:
+            valid_to = None
 
-        # Example: Find PDF links on the Maxima website
-        pdf_links = driver.find_elements(By.XPATH, "//a[contains(@href, '.pdf')]")
-        if not pdf_links:
-            logger.warning("No PDF links found on %s", url)
+        new_item = Item(
+            name=title,
+            price=price,
+            discount=discount,
+            vendor='Maxima',
+            deadline=valid_to
+        )
+        db.session.add(new_item)
 
-        for link in pdf_links:
-            pdf_url = link.get_attribute("href")
-            try:
-                driver.get(pdf_url)
-                WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, "//body"))
-                )
-                # Wait for 10 seconds before closing the driver
-                time.sleep(10)
-            except WebDriverException as e:
-                logger.error("Error downloading PDF from %s: %s", pdf_url, e)
-    except WebDriverException as e:
-        logger.error("Error accessing %s: %s", url, e)
-    finally:
-        driver.quit()
+    db.session.commit()
 
 if __name__ == "__main__":
-    download_directory = os.path.join(os.getcwd(), "downloads")
-    os.makedirs(download_directory, exist_ok=True)
-
-    # Download PDFs from Lidl and Maxima
-    download_pdfs_from_lidl(download_directory)
-    download_pdfs_from_maxima(download_directory)
+    from app import create_app
+    app = create_app()
+    with app.app_context():
+        parse_maxima_sales()
