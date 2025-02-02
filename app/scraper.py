@@ -4,80 +4,55 @@ Module for scraping discount booklets from grocery stores.
 
 import os
 import time
+import re
+from datetime import datetime
+import sqlite3
 import logging
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import WebDriverException, TimeoutException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import requests
 from bs4 import BeautifulSoup
-import sqlite3
 from flask_sqlalchemy import SQLAlchemy
 from app.models import db, Item
-from datetime import datetime
-import re
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def configure_driver(download_dir: str):
-    """
-    Configures and returns a Selenium WebDriver instance.
-
-    Args:
-        download_dir (str): Directory where the PDFs will be saved.
-
-    Returns:
-        WebDriver: Configured WebDriver instance.
-    """
-    chrome_options = Options()
-    prefs = {
-        "download.default_directory": download_dir,
-        "plugins.always_open_pdf_externally": True
-    }
-    chrome_options.add_experimental_option("prefs", prefs)
-
-    return webdriver.Chrome(options=chrome_options)
-
 def parse_maxima_sales():
     """
     Parses sales data from maxima.lv and inserts it into the database.
     """
-    url = "https://www.maxima.lv/ajax/salesloadmore?sort_by=newest&limit=10000&search="
-    response = requests.get(url)
-    if response.status_code != 200:
-        logger.error("Failed to fetch data from %s", url)
+    url = "https://www.maxima.lv/ajax/salesloadmore?sort_by=newest&limit=150&search="
+    try:
+        response = requests.get(url, timeout=10)  # Add timeout parameter
+        response.raise_for_status()  # Raise an exception for HTTP errors
+    except requests.exceptions.Timeout:
+        logger.error("Request to %s timed out", url)
+        return
+    except requests.exceptions.RequestException as e:
+        logger.error("Request to %s failed: %s", url, e)
         return
 
     soup = BeautifulSoup(response.text, 'html.parser')
     items = soup.find_all('div', class_='item')
 
     for item in items:
-        
+        # Ignore items with the class 'offer-2-l-pd-sku-lidz'
         if 'offer-2-l-pd-sku-lidz' in item.get('class', []):
             continue
 
+        # Ignore items that contain a div with the class 'discount percents'
         if item.find('div', class_='discount percents'):
             continue
 
         title = item.find('div', class_='title').text.strip()
 
+        # Extract unit and quantity from the title
         quantity = None
         unit = None
-        match = re.search(r'(\d+)\s*(gab.|kg|ml|l|g)', title, re.IGNORECASE)
+        match = re.search(r'(\d+)\s*(g|kg|ml|l|pcs)', title, re.IGNORECASE)
         if match:
             quantity = int(match.group(1))
             unit = match.group(2).lower()
-            if unit == 'kg':
-                quantity *= 1000
-                unit = 'g'
-            elif unit == 'l':
-                quantity *= 1000
-                unit = 'ml'
-            title = re.sub(r'(\d+\s*(gab.|kg|ml|l|g))(.*)', '', title).replace(',', '').strip()
 
         price_element = item.find('div', class_='t1')
         if price_element:
@@ -86,7 +61,7 @@ def parse_maxima_sales():
             price = float(f"{value}.{cents}")
         else:
             price = 0.0
-        
+
         old_price_element = item.find('div', class_='t2')
         if old_price_element:
             old_price_text = old_price_element.find('span', class_='value').text.strip()
@@ -95,6 +70,7 @@ def parse_maxima_sales():
         else:
             discount = 0.0
 
+        # Extract deadline from data-dates-interval attribute
         dates_interval = item.get('data-dates-interval')
         if dates_interval:
             end_date_str = dates_interval.split(' - ')[1].strip('.')
@@ -102,28 +78,20 @@ def parse_maxima_sales():
         else:
             valid_to = None
 
-        product_id = item.get('data-product-id')
+        # TODO: Implement categorization based on title or other criteria
+        category = None
 
-        existing_item = Item.query.filter_by(product_id=product_id).first()
-        if existing_item:
-            existing_item.price = price
-            existing_item.discount = discount
-            existing_item.vendor = 'Maxima'
-            existing_item.deadline = valid_to
-            existing_item.quantity = quantity
-            existing_item.unit = unit
-        else:
-            new_item = Item(
-                name=title,
-                price=price,
-                discount=discount,
-                vendor='Maxima',
-                deadline=valid_to,
-                quantity=quantity,
-                unit=unit,
-                product_id=product_id
-            )
-            db.session.add(new_item)
+        new_item = Item(
+            name=title,
+            price=price,
+            quantity=quantity,
+            unit=unit,
+            discount=discount,
+            vendor='Maxima',
+            deadline=valid_to,
+            category=category
+        )
+        db.session.add(new_item)
 
     db.session.commit()
 
