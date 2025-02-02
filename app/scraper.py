@@ -17,6 +17,7 @@ import sqlite3
 from flask_sqlalchemy import SQLAlchemy
 from app.models import db, Item
 from datetime import datetime
+import re
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -133,7 +134,7 @@ def parse_maxima_sales():
     """
     Parses sales data from maxima.lv and inserts it into the database.
     """
-    url = "https://www.maxima.lv/ajax/salesloadmore?sort_by=newest&limit=150&search="
+    url = "https://www.maxima.lv/ajax/salesloadmore?sort_by=newest&limit=10000&search="
     response = requests.get(url)
     if response.status_code != 200:
         logger.error("Failed to fetch data from %s", url)
@@ -151,6 +152,20 @@ def parse_maxima_sales():
             continue
 
         title = item.find('div', class_='title').text.strip()
+
+        quantity = None
+        unit = None
+        match = re.search(r'(\d+)\s*(gab.|kg|ml|l|g)', title, re.IGNORECASE)
+        if match:
+            quantity = int(match.group(1))
+            unit = match.group(2).lower()
+            if unit == 'kg':
+                quantity *= 1000
+                unit = 'g'
+            elif unit == 'l':
+                quantity *= 1000
+                unit = 'ml'
+            title = re.sub(r'(\d+\s*(gab.|kg|ml|l|g))(.*)', '', title).replace(',', '').strip()
 
         price_element = item.find('div', class_='t1')
         if price_element:
@@ -175,14 +190,28 @@ def parse_maxima_sales():
         else:
             valid_to = None
 
-        new_item = Item(
-            name=title,
-            price=price,
-            discount=discount,
-            vendor='Maxima',
-            deadline=valid_to
-        )
-        db.session.add(new_item)
+        product_id = item.get('data-product-id')
+
+        existing_item = Item.query.filter_by(product_id=product_id).first()
+        if existing_item:
+            existing_item.price = price
+            existing_item.discount = discount
+            existing_item.vendor = 'Maxima'
+            existing_item.deadline = valid_to
+            existing_item.quantity = quantity
+            existing_item.unit = unit
+        else:
+            new_item = Item(
+                name=title,
+                price=price,
+                discount=discount,
+                vendor='Maxima',
+                deadline=valid_to,
+                quantity=quantity,
+                unit=unit,
+                product_id=product_id
+            )
+            db.session.add(new_item)
 
     db.session.commit()
 

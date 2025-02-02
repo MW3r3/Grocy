@@ -21,6 +21,7 @@ class Item(db.Model):
     category = db.Column(db.String(50), nullable=True)
     deadline = db.Column(db.DateTime, nullable=True)
     unit = db.Column(db.String(20), nullable=True)
+    product_id = db.Column(db.String(20), nullable=True) 
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
 

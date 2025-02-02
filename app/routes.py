@@ -15,7 +15,8 @@ def index():
     Route for the index page.
     """
     items = Item.query.all()
-    return render_template("index.html", items=items)
+    total_items = Item.query.count()
+    return render_template("index.html", items=items, total_items=total_items)
 
 @main.route("/add", methods=["POST"])
 def add():
