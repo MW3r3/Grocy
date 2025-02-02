@@ -5,7 +5,7 @@ Routes module for the Flask application.
 import os
 from flask import Blueprint, render_template, request, redirect, url_for
 from .models import db, Item
-from .scraper import download_pdfs_from_lidl, parse_maxima_sales
+from .scraper import parse_maxima_sales
 
 main = Blueprint("main", __name__)
 
@@ -47,26 +47,10 @@ def delete(item_id):
         db.session.commit()
     return redirect(url_for("main.index"))
 
-@main.route("/upload", methods=["GET", "POST"])
-def upload():
-    """
-    Route for uploading PDFs.
-    """
-    if request.method == "POST":
-        file = request.files["file"]
-        if file:
-            file_path = os.path.join("uploads", file.filename)
-            file.save(file_path)
-            # Placeholder for processing the uploaded PDF
-            # process_pdf(file_path)
-            return redirect(url_for("main.index"))
-    return render_template("upload.html")
-
 @main.route("/scrape")
 def scrape():
     """
-    Route for scraping PDFs.
+    Route for scraping sales data from Maxima.
     """
-    #download_pdfs_from_lidl("downloads")
     parse_maxima_sales()
     return redirect(url_for("main.index"))
