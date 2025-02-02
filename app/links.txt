@@ -1,0 +1,16 @@
+Fruits&Vegetables=https://www.rimi.lv/e-veikals/lv/produkti/augli-un-darzeni/c/SH-2?currentPage=1&pageSize=100
+Prepared-Food=https://www.rimi.lv/e-veikals/lv/produkti/gatavots-rimi/c/SH-17?currentPage=1&pageSize=100
+Vegan=https://www.rimi.lv/e-veikals/lv/produkti/veganiem-un-vegetariesiem/c/SH-16?currentPage=1&pageSize=100
+Meats=https://www.rimi.lv/e-veikals/lv/produkti/gala-zivis-un-gatava-kulinarija/c/SH-6?currentPage=1&pageSize=100
+Milk-products=https://www.rimi.lv/e-veikals/lv/produkti/piena-produkti-un-olas/c/SH-11?currentPage=1&pageSize=100
+Breads=https://www.rimi.lv/e-veikals/lv/produkti/maize-un-konditoreja/c/SH-7?currentPage=1&pageSize=100
+Frozen-Products=https://www.rimi.lv/e-veikals/lv/produkti/saldetie-edieni/c/SH-12?currentPage=1&pageSize=100
+Packaged-Food=https://www.rimi.lv/e-veikals/lv/produkti/iepakota-partika/c/SH-4?currentPage=1&pageSize=100
+Deserts&Snacks=https://www.rimi.lv/e-veikals/lv/produkti/saldumi-un-uzkodas/c/SH-13?currentPage=1&pageSize=100
+Beverages=https://www.rimi.lv/e-veikals/lv/produkti/dzerieni/c/SH-5?currentPage=1&pageSize=100
+Alcohol=https://www.rimi.lv/e-veikals/lv/produkti/alkoholiskie-dzerieni/c/SH-1?currentPage=1&pageSize=100
+Beauty&Hygiene=https://www.rimi.lv/e-veikals/lv/produkti/skaistumkopsanai-un-higienai/c/SH-14?currentPage=1&pageSize=100
+Babies&Kids=https://www.rimi.lv/e-veikals/lv/produkti/zidainiem-un-berniem/c/SH-15?currentPage=1&pageSize=100
+Cleaning-Products=https://www.rimi.lv/e-veikals/lv/produkti/sadzives-kimija/c/SH-10?currentPage=1&pageSize=100
+Pet-Products=https://www.rimi.lv/e-veikals/lv/produkti/majdzivniekiem/c/SH-8?currentPage=1&pageSize=100
+Home&Garden=https://www.rimi.lv/e-veikals/lv/produkti/majai-darzam-un-atputai/c/SH-3?currentPage=1&pageSize=100

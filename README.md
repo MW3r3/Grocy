@@ -6,9 +6,9 @@ Grocy is a Flask application designed to scrape discount booklets from grocery s
 
 ## Features
 
-- Scrapes and downloads discount data from Maxima.lv (functioning)
+- Scrapes and downloads discount data from Maxima.lv
+- Scrapes discount data from Rimi.lv
 - Main database schema for storing data
-- Scrapes discount data from Rimi.lv (to be implemented)
 - Displays the cheapest prices for items across different markets (to be implemented)
 - Easy setup and configuration
 
