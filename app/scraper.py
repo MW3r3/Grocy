@@ -21,7 +21,7 @@ def parse_maxima_sales():
     """
     Parses sales data from maxima.lv and inserts it into the database.
     """
-    url = "https://www.maxima.lv/ajax/salesloadmore?sort_by=newest&limit=150&search="
+    url = "https://www.maxima.lv/ajax/salesloadmore?sort_by=newest&limit=2000&search="
     try:
         response = requests.get(url, timeout=10)  # Add timeout parameter
         response.raise_for_status()  # Raise an exception for HTTP errors
