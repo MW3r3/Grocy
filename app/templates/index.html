@@ -4,41 +4,26 @@
 {% block title %}Grocy - Home{% endblock %}
 
 {% block content %}
-<h2>Items</h2>
-<p>Total items in the database: {{ total_items }}</p>
-<table>
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Discount</th>
-            <th>Vendor</th>
-            <th>Category</th>
-            <th>Unit</th>
-            <th>Deadline</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in items[:100] %}
-        <tr>
-            <td>{{ item.name }}</td>
-            <td>{{ item.price }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.discount }}</td>
-            <td>{{ item.vendor }}</td>
-            <td>{{ item.category }}</td>
-            <td>{{ item.unit }}</td>
-            <td>{{ item.deadline }}</td>
-            <td>
-                <a href="{{ url_for('main.delete', item_id=item.id) }}">Delete</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<h2>Fuzzy Search Items</h2>
+<form id="search-form">
+    <input type="text" id="search-query" placeholder="Search for items..." required>
+    <button type="submit">Search</button>
+</form>
+
+<div id="search-results"></div>
 
 <h2>Scrape Price Data</h2>
 <a href="{{ url_for('main.scrape') }}">Scrape Price Data from Maxima</a>
+
+<script>
+document.getElementById('search-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const query = document.getElementById('search-query').value;
+    fetch(`{{ url_for('main.search') }}?query=${query}`)
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('search-results').innerHTML = data;
+        });
+});
+</script>
 {% endblock %}

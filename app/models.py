@@ -75,10 +75,9 @@ class Item(db.Model):
         )
 
     @classmethod
-    def fuzzy_search_by_name(cls, search_term, threshold=60, limit=10):
+    def fuzzy_search_by_name(cls, search_term, threshold=30, limit=10):
         """Fuzzy search for items by name."""
-        prefilter = search_term[:2] if len(search_term) >= 2 else search_term
-        candidates = cls.query.filter(cls.name.ilike(f"%{prefilter}%")).all()  # Loose prefilter
+        candidates = cls.query.all()
         ranked_items = []
         for item in candidates:
             score = fuzz.ratio(item.name.lower(), search_term.lower())

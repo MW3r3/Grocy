@@ -53,3 +53,15 @@ def scrape():
     """
     parse_maxima_sales()
     return redirect(url_for("main.index"))
+
+@main.route("/search")
+def search():
+    """
+    Route for fuzzy searching items.
+    """
+    query = request.args.get("query", "")
+    if query:
+        items = Item.fuzzy_search_by_name(query)
+    else:
+        items = []
+    return render_template("search_results_partial.html", items=items)
