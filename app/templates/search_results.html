@@ -12,7 +12,7 @@
             <th>Price</th>
             <th>Quantity</th>
             <th>Discount</th>
-            <th>Vendor</th>
+            <th>brand</th>
             <th>Category</th>
             <th>Unit</th>
             <th>Deadline</th>
@@ -22,10 +22,10 @@
         {% for item in items %}
         <tr>
             <td>{{ item.name }}</td>
-            <td>{{ item.price }}</td>
+            <td>{{ item.price.value }}</td>
             <td>{{ item.quantity }}</td>
-            <td>{{ item.discount }}</td>
-            <td>{{ item.vendor }}</td>
+            <td>{{ item.price.discount }}</td>
+            <td>{{ item.brand }}</td>
             <td>{{ item.category }}</td>
             <td>{{ item.unit }}</td>
             <td>{{ item.deadline }}</td>

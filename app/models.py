@@ -50,7 +50,21 @@ class Item:
 
     @classmethod
     def search_by_name(cls, search_term):
-        return list(cls.collection().find({"name": {"$regex": search_term, "$options": "i"}}))
+        pipeline = [
+            {
+                "$search": {
+                    "index": "search_name",
+                    "text": {
+                        "query": search_term,
+                        "path": { "wildcard": "*" }
+                    }
+                }
+            },
+            {"$limit": 10}
+        ]
+        results = list(cls.collection().aggregate(pipeline))
+        current_app.logger.info("Search results for '%s': %s", search_term, results)
+        return results
 
     @classmethod
     def init_collection(cls):
