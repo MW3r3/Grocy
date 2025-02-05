@@ -4,6 +4,7 @@ Models module for the Flask application.
 
 import os
 import json
+import unicodedata
 from flask import current_app
 from bson.objectid import ObjectId
 
@@ -49,21 +50,28 @@ class Item:
         return cls.collection().delete_one({"_id": ObjectId(item_id)})
 
     @classmethod
+    def remove_diacritics(cls, text):
+        # Normalize to NFD and filter out non-spacing marks
+        return ''.join(c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn')
+    
+    @classmethod
     def search_by_name(cls, search_term):
+        normalized_query = cls.remove_diacritics(search_term.lower())
         pipeline = [
             {
                 "$search": {
                     "index": "search_name",
                     "text": {
-                        "query": search_term,
-                        "path": { "wildcard": "*" }
+                        "query": normalized_query,
+                        "path": "search_name",  # 'search_name' field contains diacritics removed
+                        "fuzzy": {}
                     }
                 }
             },
             {"$limit": 10}
         ]
         results = list(cls.collection().aggregate(pipeline))
-        current_app.logger.info("Search results for '%s': %s", search_term, results)
+        current_app.logger.info("Search results for '%s' (normalized: '%s'): %s", search_term, normalized_query, results)
         return results
 
     @classmethod

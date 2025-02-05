@@ -2,7 +2,7 @@
 Routes module for the Flask application.
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, copy_current_request_context
 from datetime import datetime
 from .models import Item
 
@@ -95,8 +95,29 @@ def scrape_rimi():
     Route for scraping sales data from Rimi.
     """
     from threading import Thread
+    from flask import copy_current_request_context
     from .scraper import parse_rimi_sales
-    Thread(target=parse_rimi_sales).start()
+
+    @copy_current_request_context
+    def run_scrape():
+        parse_rimi_sales()
+
+    Thread(target=run_scrape).start()
+    return redirect(url_for("main.index"))
+
+@main.route("/categorize_maxima")
+def categorize_maxima():
+    """
+    Route for categorizing Maxima items based on Rimi items.
+    """
+    from .scraper import categorize_maxima_items
+    from threading import Thread
+
+    @copy_current_request_context
+    def run_categorize():
+        categorize_maxima_items()
+
+    Thread(target=run_categorize).start()
     return redirect(url_for("main.index"))
 
 @main.route("/search")
