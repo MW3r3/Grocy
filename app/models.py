@@ -56,22 +56,26 @@ class Item:
     
     @classmethod
     def search_by_name(cls, search_term):
-        normalized_query = cls.remove_diacritics(search_term.lower())
         pipeline = [
             {
                 "$search": {
                     "index": "search_name",
                     "text": {
-                        "query": normalized_query,
-                        "path": "search_name",  # 'search_name' field contains diacritics removed
+                        "query": search_term,
+                        "path": "search_name",  
                         "fuzzy": {}
                     }
+                }
+            },
+            {
+                "$match": {
+                    "stock": True
                 }
             },
             {"$limit": 10}
         ]
         results = list(cls.collection().aggregate(pipeline))
-        current_app.logger.info("Search results for '%s' (normalized: '%s'): %s", search_term, normalized_query, results)
+        current_app.logger.info("Search results for '%s' (normalized: '%s'): %s", search_term, search_term, results)
         return results
 
     @classmethod

@@ -154,7 +154,7 @@ def parse_maxima_sales():
                 "discount": discount,
                 "currency": "EUR",
                 "price_per_unit": (
-                    round(price * 1000 / quantity, 2) if quantity and quantity != 0 and unit in ['g', 'ml']
+                    round(price / (quantity/1000), 2) if quantity and quantity != 0 and unit in ['g', 'ml']
                     else (round(price / quantity, 2) if quantity and quantity != 0 else 0)
                 )
             },
@@ -319,7 +319,7 @@ def parse_rimi_sales():
                             "discount": discount,
                             "currency": "EUR",
                             "price_per_unit": (
-                                round(price * 1000 / quantity, 2) if quantity and quantity != 0 and unit in ['g', 'ml']
+                                round(price / (quantity/1000), 2) if quantity and quantity != 0 and unit in ['g', 'ml']
                                 else (round(price / quantity, 2) if quantity and quantity != 0 else 0)
                             )
                         },

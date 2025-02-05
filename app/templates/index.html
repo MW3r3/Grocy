@@ -1,38 +1,45 @@
-<!-- app/templates/index.html -->
 {% extends "base.html" %}
 
-{% block title %}Grocy - Home{% endblock %}
+{% block title %}Grozsery - Home{% endblock %}
 
 {% block content %}
-<p>Total Items: {{ total_items }}</p>
+    <div class="stats-card">
+        <h2>Statistics</h2>
+        <p>Total Items: {{ total_items }}</p>
+    </div>
 
-<!-- New button to delete all items -->
-<form action="{{ url_for('main.delete_all') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete all items?');">
-    <button type="submit">Delete All Items</button>
-</form>
+    <div class="search-container">
+        <h2>Search Items</h2>
+        <form id="search-form" class="search-form">
+            <input type="text" id="search-query" class="search-input" 
+                   placeholder="Search for items..." required>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
 
-<!-- Single search form -->
-<h2>Search Items</h2>
-<form id="search-form">
-    <input type="text" id="search-query" placeholder="Search for items..." required>
-    <button type="submit">Search</button>
-</form>
-<div id="search-results"></div>
+    <div class="actions-container">
+        <a href="{{ url_for('main.scrape') }}" class="btn btn-primary">
+            Scrape Maxima Data
+        </a>
+        <a href="{{ url_for('main.scrape_rimi') }}" class="btn btn-primary">
+            Scrape Rimi Data
+        </a>
+        <a href="{{ url_for('main.categorize_maxima') }}" class="btn btn-primary">
+            Categorize Items
+        </a>
+    </div>
 
-<h2>Scrape Price Data</h2>
-<a href="{{ url_for('main.scrape') }}">Scrape Price Data from Maxima</a>
-<a href="{{ url_for('main.scrape_rimi') }}">Scrape Price Data from Rimi</a>
-<a href="{{ url_for('main.categorize_maxima') }}">Categorize Maxima Items</a>
+    <div id="search-results"></div>
 
-<script>
-document.getElementById('search-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const query = document.getElementById('search-query').value;
-    fetch(`{{ url_for('main.search') }}?query=${query}`)
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('search-results').innerHTML = data;
-        });
-});
-</script>
+    <script>
+    document.getElementById('search-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const query = document.getElementById('search-query').value;
+        fetch(`{{ url_for('main.search') }}?query=${query}`)
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('search-results').innerHTML = data;
+            });
+    });
+    </script>
 {% endblock %}

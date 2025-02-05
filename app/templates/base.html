@@ -5,22 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Grocy{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
-        <h1>Welcome to Grocy</h1>
+        <h1>Grocy</h1>
         <nav>
             <ul>
                 <li><a href="{{ url_for('main.index') }}">Home</a></li>
-                
             </ul>
         </nav>
     </header>
+    
     <main>
         {% block content %}{% endblock %}
     </main>
+    
+    <!-- Item Details Modal -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle"></h2>
+            <div class="modal-body">
+                <div class="detail-row">
+                    <strong>Store:</strong>
+                    <span id="modalStore"></span>
+                </div>
+                <div class="detail-row">
+                    <strong>Brand:</strong>
+                    <span id="modalBrand"></span>
+                </div>
+                <div class="detail-row">
+                    <strong>Category:</strong>
+                    <span id="modalCategory"></span>
+                </div>
+                <div class="detail-row">
+                    <strong>Current Price:</strong>
+                    <span id="modalPrice"></span>
+                </div>
+                <div class="detail-row">
+                    <strong>Original Price:</strong>
+                    <span id="modalOriginalPrice"></span>
+                </div>
+                <div class="detail-row">
+                    <strong>Discount:</strong>
+                    <span id="modalDiscount"></span>
+                </div>
+                <div class="detail-row">
+                    <strong>Quantity:</strong>
+                    <span id="modalQuantity"></span>
+                </div>
+                <div class="detail-row">
+                    <strong>Price per Unit:</strong>
+                    <span id="modalPricePerUnit"></span>
+                </div>
+                <div class="detail-row">
+                    <strong>Last Updated:</strong>
+                    <span id="modalUpdated"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <footer>
         <p>&copy; {{ current_year }} Grocy. All rights reserved.</p>
     </footer>
+
+    <script>
+        // Define showItemDetails globally
+        window.showItemDetails = function(item) {
+            console.log('showItemDetails called with:', item); // Debug log
+            document.getElementById('modalTitle').textContent = item.name;
+            document.getElementById('modalStore').textContent = item.store;
+            document.getElementById('modalBrand').textContent = item.brand || '-';
+            document.getElementById('modalCategory').textContent = item.category || '-';
+            document.getElementById('modalPrice').textContent = `€${item.price.value.toFixed(2)}`;
+            document.getElementById('modalOriginalPrice').textContent = `€${item.price.old_value.toFixed(2)}`;
+            document.getElementById('modalDiscount').textContent = item.price.discount > 0 ? `-${item.price.discount}%` : '-';
+            document.getElementById('modalQuantity').textContent = item.quantity ? `${item.quantity} ${item.unit}` : '-';
+            document.getElementById('modalPricePerUnit').textContent = item.price.price_per_unit ? 
+                `€${item.price.price_per_unit.toFixed(2)}/${item.unit}` : '-';
+            document.getElementById('modalUpdated').textContent = new Date(item.time.updated).toLocaleString();
+            
+            const modal = document.getElementById('itemModal');
+            modal.style.display = 'block';
+        }
+
+        // Close modal when clicking the X or outside the modal
+        document.querySelector('.close').addEventListener('click', function() {
+            document.getElementById('itemModal').style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('itemModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

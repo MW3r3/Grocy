@@ -1,32 +1,63 @@
 {% if items %}
-<table>
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Discount</th>
-            <th>brand</th>
-            <th>Category</th>
-            <th>Unit</th>
-            <th>Deadline</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in items %}
-        <tr>
-            <td>{{ item.name }}</td>
-            <td>{{ item.price.value }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.price.discount }}</td>
-            <td>{{ item.brand }}</td>
-            <td>{{ item.category }}</td>
-            <td>{{ item.unit }}</td>
-            <td>{{ item.time.discount_deadline }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <div class="table-container">
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Store</th>
+                    <th>Price</th>
+                    <th>Original Price</th>
+                    <th>Discount</th>
+                    <th>
+                        Category
+                        {% if items[0].store == "MAXIMA" %}
+                        <span class="info-icon" title="Categories for Maxima items are matched automatically and may not be 100% accurate">
+                            ℹ️
+                        </span>
+                        {% endif %}
+                    </th>
+                    <th>Amount</th>
+                    <th>Price/Unit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr class="{% if item.price.discount > 0 %}has-discount{% endif %}" 
+                        onclick='showItemDetails({{ item|tojson }})'
+                        style="cursor: pointer;">
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.store }}</td>
+                        <td>€{{ "%.2f"|format(item.price.value) }}</td>
+                        <td>{% if item.price.old_value != item.price.value %}€{{ "%.2f"|format(item.price.old_value) }}{% else %}-{% endif %}</td>
+                        <td class="discount-cell">{% if item.price.discount > 0 %}-{{ item.price.discount }}%{% else %}-{% endif %}</td>
+                        <td>{{ item.category if item.category else '-' }}</td>
+                        <td>
+                            {% if item.quantity %}
+                                {% if item.unit in ['g', 'ml'] and item.quantity >= 1000 %}
+                                    {{ "%.1f"|format(item.quantity/1000) }} {{ 'kg' if item.unit == 'g' else 'L' }}
+                                {% else %}
+                                    {{ "%.0f"|format(item.quantity) }} {{ item.unit }}
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.price.price_per_unit %}
+                                {% if item.unit in ['g', 'ml'] %}
+                                    €{{ "%.2f"|format(item.price.price_per_unit) }}/{{ 'kg' if item.unit == 'g' else 'L' }}
+                                {% else %}
+                                    €{{ "%.2f"|format(item.price.price_per_unit) }}/{{ item.unit }}
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% else %}
-<p>No items found.</p>
+    <p class="no-results">No items found.</p>
 {% endif %}
