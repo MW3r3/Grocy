@@ -55,7 +55,8 @@ class Item:
         return ''.join(c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn')
     
     @classmethod
-    def search_by_name(cls, search_term):
+    def search_by_name(cls, search_term, filters=None):
+        # Base search pipeline
         pipeline = [
             {
                 "$search": {
@@ -66,16 +67,36 @@ class Item:
                         "fuzzy": {}
                     }
                 }
-            },
-            {
-                "$match": {
-                    "stock": True
-                }
-            },
-            {"$limit": 10}
+            }
         ]
+
+        # Add filters if provided
+        match_conditions = {}
+        if filters:
+            if 'stock' in filters:
+                match_conditions['stock'] = filters['stock']
+            if 'category' in filters:
+                match_conditions['category'] = filters['category']
+            if 'min_quantity' in filters:
+                match_conditions['quantity'] = {'$gte': filters['min_quantity']}
+            if 'max_quantity' in filters:
+                match_conditions.setdefault('quantity', {})['$lte'] = filters['max_quantity']
+            if 'store' in filters:
+                match_conditions['store'] = filters['store']
+
+        # Add match stage if there are any conditions
+        if match_conditions:
+            pipeline.append({"$match": match_conditions})
+
+        pipeline.append({"$limit": 10})
+        
         results = list(cls.collection().aggregate(pipeline))
-        current_app.logger.info("Search results for '%s' (normalized: '%s'): %s", search_term, search_term, results)
+        current_app.logger.info(
+            "Search results for '%s' with filters %s: %s", 
+            search_term, 
+            filters, 
+            results
+        )
         return results
 
     @classmethod

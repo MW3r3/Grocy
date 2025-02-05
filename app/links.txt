@@ -14,3 +14,4 @@ Babies&Kids=https://www.rimi.lv/e-veikals/lv/produkti/zidainiem-un-berniem/c/SH-
 Cleaning-Products=https://www.rimi.lv/e-veikals/lv/produkti/sadzives-kimija/c/SH-10?currentPage=1&pageSize=100
 Pet-Products=https://www.rimi.lv/e-veikals/lv/produkti/majdzivniekiem/c/SH-8?currentPage=1&pageSize=100
 Home&Garden=https://www.rimi.lv/e-veikals/lv/produkti/majai-darzam-un-atputai/c/SH-3?currentPage=1&pageSize=100
+Clothing=https://www.rimi.lv/e-veikals/lv/produkti/zidainiem-un-berniem/c/SH-15?currentPage=1&pageSize=100

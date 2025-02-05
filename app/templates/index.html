@@ -11,9 +11,35 @@
     <div class="search-container">
         <h2>Search Items</h2>
         <form id="search-form" class="search-form">
-            <input type="text" id="search-query" class="search-input" 
-                   placeholder="Search for items..." required>
-            <button type="submit" class="btn btn-primary">Search</button>
+            <div class="search-row">
+                <input type="text" id="search-query" class="search-input" 
+                       placeholder="Search for items..." required>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+            <div class="filter-row">
+                <select id="category-filter" class="filter-select">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                </select>
+                <label class="filter-checkbox">
+                    <input type="checkbox" id="stock-filter" checked>
+                    In Stock Only
+                </label>
+                <div class="quantity-filter">
+                    <input type="number" id="min-quantity" class="quantity-input" 
+                           placeholder="Min Qty" min="0">
+                    <input type="number" id="max-quantity" class="quantity-input" 
+                           placeholder="Max Qty" min="0">
+                </div>
+                <select id="store-filter" class="filter-select">
+                    <option value="">All Stores</option>
+                    {% for store in stores %}
+                    <option value="{{ store }}">{{ store }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </form>
     </div>
 
@@ -38,7 +64,22 @@
     document.getElementById('search-form').addEventListener('submit', function(event) {
         event.preventDefault();
         const query = document.getElementById('search-query').value;
-        fetch(`{{ url_for('main.search') }}?query=${query}`)
+        const category = document.getElementById('category-filter').value;
+        const stock = document.getElementById('stock-filter').checked;
+        const minQuantity = document.getElementById('min-quantity').value;
+        const maxQuantity = document.getElementById('max-quantity').value;
+        const store = document.getElementById('store-filter').value;
+
+        const filters = new URLSearchParams({
+            query: query,
+            category: category,
+            stock: stock,
+            min_quantity: minQuantity,
+            max_quantity: maxQuantity,
+            store: store
+        });
+
+        fetch(`{{ url_for('main.search') }}?${filters.toString()}`)
             .then(response => response.text())
             .then(data => {
                 document.getElementById('search-results').innerHTML = data;
