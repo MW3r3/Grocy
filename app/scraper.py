@@ -87,9 +87,10 @@ def parse_maxima_sales():
         except:
             quantity = None
             unit = None
-            match = re.search(r'(\d+)\s*(gab.|kg|ml|l|g)', title, re.IGNORECASE)
+            match = re.search(r'(\d+(?:[.,]\d+)?)\s*(gab\.|kg|ml|l|g)', title, re.IGNORECASE)
             if match:
-                quantity = int(match.group(1))
+                quantity_str = match.group(1).replace(',', '.')
+                quantity = float(quantity_str)
                 unit = match.group(2).lower()
                 if unit == 'kg':
                     quantity *= 1000
