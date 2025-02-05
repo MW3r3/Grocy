@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: grozsery
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn "app:create_app()" --bind 0.0.0.0:$PORT
+    envVars:
+      - key: MONGO_URI
+        fromDatabase:
+          name: grocy-db
+          property: connectionString
+      - key: FLASK_APP
+        value: app
+      - key: FLASK_ENV
+        value: production

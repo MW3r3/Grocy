@@ -4,6 +4,7 @@ Initialization module for the Flask application.
 
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 load_dotenv()
 from flask import Flask
 from flask_pymongo import PyMongo
@@ -17,8 +18,16 @@ def create_app(config=None):
     Create and configure the Flask application.
     """
     app = Flask(__name__)
-
-    app.config["MONGO_URI"] = os.environ.get("MONGO_URI")
+    
+    # Get the absolute path to the certificate file
+    cert_path = os.path.join(Path(__file__).parent.parent, 'isrgrootx1.pem')
+    
+    # Update MongoDB URI with absolute cert path
+    mongo_uri = os.environ.get("MONGO_URI")
+    if mongo_uri and 'tlsCAFile=' in mongo_uri:
+        mongo_uri = mongo_uri.replace('tlsCAFile=./isrgrootx1.pem', f'tlsCAFile={cert_path}')
+        
+    app.config["MONGO_URI"] = mongo_uri
     
     mongo = PyMongo(app)
     app.mongo = mongo
