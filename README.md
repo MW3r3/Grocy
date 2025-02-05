@@ -66,6 +66,13 @@ make run-dev
 FLASK_APP=app FLASK_DEBUG=TRUE flask run
 ```
 
+### Running with Gunicorn
+
+To run the application with Gunicorn:
+```sh
+gunicorn -w 4 -b 127.0.0.1:5000 app:app
+```
+
 ### Available Make Commands
 
 - `make install`: Install dependencies

@@ -10,9 +10,6 @@ from flask import Flask
 from flask_pymongo import PyMongo
 from .routes import main as main_blueprint
 
-
-
-
 def create_app(config=None):
     """
     Create and configure the Flask application.
@@ -32,7 +29,6 @@ def create_app(config=None):
     mongo = PyMongo(app)
     app.mongo = mongo
 
-
     with app.app_context():
         from .models import Item
         try:
@@ -46,3 +42,6 @@ def create_app(config=None):
     app.register_blueprint(main_blueprint)
 
     return app
+
+# Create the app instance
+app = create_app()
