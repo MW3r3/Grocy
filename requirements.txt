@@ -9,7 +9,7 @@ charset-normalizer==3.4.1
 click==8.1.8
 dill==0.3.9
 dnspython==2.7.0
-Flask==2.2.3
+Flask
 Flask-Migrate==3.1.0
 Flask-PyMongo==3.0.1
 Flask-SQLAlchemy==2.5.1
