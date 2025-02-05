@@ -1,100 +1,136 @@
-# Grocy
+# Grocy - Grocery Price Comparison App
 
-Grocy is a Flask application designed to scrape discount booklets from grocery stores' websites, extract individual items and their discounts, and store the data in a SQLite database to show which market has the cheapest prices.
-
-**Note: This project is still in progress.**
+A Flask application that scrapes and compares grocery prices from Latvian stores (Maxima and Rimi). The app collects discount information and helps users find the best deals across different supermarkets.
 
 ## Features
 
-- Scrapes and downloads discount data from Maxima.lv
-- Scrapes discount data from Rimi.lv
-- Main database schema for storing data
-- Displays the cheapest prices for items across different markets (to be implemented)
-- Easy setup and configuration
+- Real-time price scraping from:
+  - Maxima.lv
+  - Rimi.lv
+- Automated categorization of products
+- Fuzzy search functionality
+- Price comparison across stores
+- Discount tracking and deadline monitoring
+- MongoDB integration with schema validation
+- Multi-threaded scraping for improved performance
+
+## Prerequisites
+
+- Python 3.x
+- MongoDB Atlas account
+- Virtual environment (recommended)
 
 ## Installation
 
 1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/grocy.git
-   ```
+```sh
+git clone <repository-url>
+cd grocy
+```
 
-2. Navigate to the project directory:
-   ```
-   cd grocy
-   ```
+2. Create and activate a virtual environment:
+```sh
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
 
-3. Create a virtual environment:
-   ```
-   python -m venv venv
-   ```
+3. Install dependencies:
+```sh
+make install
+# or
+pip install -r requirements.txt
+```
 
-4. Activate the virtual environment:
-   - On Windows:
-     ```
-     venv\Scripts\activate
-     ```
-   - On macOS/Linux:
-     ```
-     source venv/bin/activate
-     ```
+## Configuration
 
-5. Install the required packages:
-   ```
-   pip install -r requirements.txt
-   ```
+1. The MongoDB connection string is configured in 
+
+__init__.py
+
+. You can override it using the `MONGO_URI` environment variable.
+
+2. Store scraping URLs are configured in 
+
+links.txt
+
+.
 
 ## Usage
 
-To run the application, execute the following command:
-```
-flask run
-```
+### Running the Application
 
-Visit `http://127.0.0.1:5000` in your web browser to access the application.
-
-## Scraping Data
-
-To download price data from Maxima.lv, run the following script:
-```
-python app/scraper.py
+Start the development server:
+```sh
+make run-dev
+# or
+FLASK_APP=app FLASK_DEBUG=TRUE flask run
 ```
 
-## Using the Makefile
+### Available Make Commands
 
-A Makefile is provided to simplify common tasks. You can use the following commands:
+- `make install`: Install dependencies
+- `make run`: Run in production mode
+- `make run-dev`: Run in development mode
+- `make reset-db`: Reset the MongoDB collection
+- `make test`: Run tests
+- `make lint`: Run pylint checks
+- 
 
-- Install dependencies:
-  ```
-  make install
-  ```
+make update-requirements
 
-- Run the application:
-  ```
-  make run
-  ```
+: Update 
 
-- Reset the database:
-  ```
-  make reset-db
-  ```
+requirements.txt
 
-- Initialize tests:
-  ```
-  make test
-  ```
 
-## Configuring Pylint
 
-To get rid of `E1101` errors for SQLAlchemy dynamic attributes, you can run Pylint with the following options:
+## Testing
+
+Run the test suite:
+```sh
+make test
+# or
+pytest
 ```
-pylint --ignored-classes=SQLAlchemy,scoped_session --generated-members=Column,Integer,String,Float,DateTime,add,commit,delete app/models.py
+
+## Project Structure
+
 ```
+grocy/
+├── app/
+│   ├── __init__.py        # Flask app initialization
+│   ├── models.py          # Database models
+│   ├── routes.py          # API routes
+│   ├── scraper.py         # Web scraping logic
+│   ├── static/            # Static files
+│   └── templates/         # HTML templates
+├── tests/                 # Test files
+├── scripts/              
+│   └── isrgrootx1.pem    # MongoDB certificate
+└── data/
+    └── dbschema.json     # MongoDB schema
+```
+
+## API Endpoints
+
+- `/`: Home page with search functionality
+- `/search`: Product search endpoint
+- `/scrape`: Trigger Maxima scraping
+- `/scrape_rimi`: Trigger Rimi scraping
+- `/categorize_maxima`: Categorize Maxima products
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or features.
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the 
+
+LICENSE
+
+ file for details.
