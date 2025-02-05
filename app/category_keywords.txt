@@ -1,0 +1,13 @@
+Beverages=sula,piens,kafija,tēja,ūdens,dzēriens,cola,sprite,fanta,limonāde,alus,minerālūdens,sulas,ledus tēja,gāzēts dzēriens,karsta šokolāde,kapučīno,espresso,latte,energijas dzēriens,kvass,morss,kokakola,pepsi,schweppes,balzams
+Dairy=siers,jogurts,piens,krējums,sviests,biezpiens,kefīrs,rjaženka,paniņas,saldais krējums,skābais krējums,mocarella,čedaras siers,mājas siers,kazas siers,siers feta,siera masa,biezpiena sieriņš,grieķu jogurts,rūgušpiens
+Meat=gaļa,vista,cīsiņi,desa,šķiņķis,maltā gaļa,cūkgaļa,liellopu gaļa,tītars,bekons,speķis,sardeles,kotletes,aknas,kūpināta gaļa,vistas fileja,vistas šķiņķīši,karbonāde,steiks,ribiņas,medaljoni
+Fish=zivs,lasis,siļķe,tuncis,garneles,mencas fileja,forele,bute,reņģes,krabju nūjiņas,jūras veltes,mīdijas,asaris,zandarts,kalmāri,tilapija,sprotis,makrele,zivju pirkstiņi,kūpināta zivs
+Bread=maize,bulciņa,bagete,kruasāns,rudzu maize,saldskābmaize,tostermaize,sēklu maize,graudu maize,baltmaize,burgermaize,hotdogmaize,pita,lavašs,rīvmaize,kēkss,sausiņi,plāncepums
+Fruits=ābols,banāns,apelsīns,citrons,melone,arbūzs,bumbieri,mandarīni,vīnogas,persiki,plūmes,zemenes,ķirši,avenes,mellenes,mango,ananass,kivi,granātābols,aprikozi
+Vegetables=tomāts,gurķis,kartupeļi,sīpols,burkāns,kāposts,paprika,ķiploki,salāti,kabacis,baklažāns,brokoļi,ziedkāposts,redīsi,bietes,ķirbis,puķkāposts,spināti,loki,puravi,sparģeļi
+Snacks=čipsi,rieksti,saldumi,šokolāde,cepumi,konfektes,popkorns,saulespuķu sēklas,kraķeri,vafeles,batoniņš,želejas konfektes,karameles,košļājamā gumija,pistācijas,mandeles,zemesrieksti,čipsoni,sāļie riekstiņi
+Pantry=milti,cukurs,sāls,eļļa,konservi,rīsi,griķi,auzu pārslas,putraimi,manna,makaroni,spageti,penne,tomātu pasta,mērces,garšvielas,pipari,mārrutki,sinepes,kečups,majonēze
+Frozen=saldēts,saldējums,saldēti dārzeņi,saldēta gaļa,saldēta zivs,pelmeņi,pica,saldētas ogas,vareņiki,kotletes,saldēti kartupeļi frī,saldēta vista,saldēti pusfabrikāti
+Alcohol=vīns,alkohol,degvīns,konjaks,šampanietis,brendijs,džins,rums,liķieris,sidrs,vermuts,viskijs,tekila,stiprie dzērieni,sarkanvīns,baltvīns,rozā vīns,šnabis
+Personal Care=šampūns,ziepes,zobu pasta,dezodorants,krēms,losjons,higiēnas preces,vate,salvetes,tualetes papīrs,mazgāšanas līdzeklis,veļas pulveris,ziepju šķidrums
+Clothing=zeķes,zeķubikses,apakšveļa,t-krekls,krekls,bikses,džinsi,jaka,cimdi,šalle,cepure,čības,kurpes,apavi,kedas,sporta apavi,džemperis,jaciņa,veste,mētelis,pidžama,halāts,apģērbs,bikšturi,jostas

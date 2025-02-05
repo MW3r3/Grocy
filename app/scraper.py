@@ -365,48 +365,89 @@ def parse_rimi_sales():
 
     logger.info("Finished parsing Rimi sales data using threads.")
 
+def load_category_keywords():
+    """Load category keywords from file."""
+    keywords = {}
+    try:
+        with open('app/category_keywords.txt', 'r', encoding='utf-8') as f:
+            for line in f:
+                if '=' in line:
+                    category, words = line.strip().split('=')
+                    keywords[category] = [word.strip().lower() for word in words.split(',')]
+    except FileNotFoundError:
+        logger.error("Category keywords file not found")
+        return {}
+    return keywords
+
 def categorize_maxima_items():
     """
-    Adds category information to Maxima items based on Rimi items using fuzzy matching.
+    Adds category information to all Maxima items using both keyword matching
+    and similar Rimi items.
     """
-    logger.info("Starting to categorize Maxima items based on Rimi items using fuzzy matching...")
+    logger.info("Starting to categorize Maxima items...")
     
-    # Fetch all Rimi items
-    rimi_items = Item.collection().find({"store": "Rimi"})
+    # Load category keywords
+    category_keywords = load_category_keywords()
     
-    # Create a dictionary mapping Rimi item names to their categories
-    rimi_category_map = {}
-    for item in rimi_items:
-        if item["category"]:
-            # Extract core product name from Rimi item using regex
-            match = re.match(r'([A-Za-z\s]+)', item["name"])  # Match only letters and spaces at the beginning
-            if match:
-                rimi_name = match.group(1).strip()
-                rimi_category_map[rimi_name] = item["category"]
-            else:
-                logger.warning(f"Could not extract name from Rimi item: {item['name']}")
+    # Fetch all Maxima items
+    maxima_items = Item.collection().find({"store": "MAXIMA"})
     
-    # Fetch all Maxima items without a category
-    maxima_items = Item.collection().find({"store": "MAXIMA", "category": None})
-    
-    # Iterate through Maxima items and update their categories based on Rimi items
     for item in maxima_items:
-        best_match = None
-        best_ratio = 0
+        # First try keyword matching
+        item_name = item["name"].lower()
+        matched_category = None
         
-        for rimi_name, rimi_category in rimi_category_map.items():
-            ratio = fuzz.ratio(item["search_name"].lower(), rimi_name.lower())
-            if ratio > best_ratio:
-                best_ratio = ratio
-                best_match = rimi_category
+        for category, keywords in category_keywords.items():
+            if any(keyword in item_name for keyword in keywords):
+                matched_category = category
+                break
         
-        # Set a threshold for the matching ratio
-        if best_match and best_ratio > 70:  # Adjust threshold as needed
-            new_category = best_match
-            Item.update(item["_id"], {"category": new_category})
-            logger.info(f"Updated category for Maxima item {item['_id']} to {new_category} (Ratio: {best_ratio})")
+        if matched_category:
+            if item.get("category") != matched_category:
+                Item.update(item["_id"], {"category": matched_category})
+                logger.info(f"Categorized '{item['name']}' as '{matched_category}' using keywords")
+            continue
+        
+        # If no keyword match, try finding similar Rimi items
+        pipeline = [
+            {
+                "$search": {
+                    "index": "search_name",
+                    "text": {
+                        "query": item["search_name"],
+                        "path": "search_name",
+                        "fuzzy": {}
+                    }
+                }
+            },
+            {
+                "$match": {
+                    "store": "Rimi",
+                    "category": {"$ne": None}
+                }
+            },
+            {
+                "$limit": 10
+            }
+        ]
+        
+        similar_items = list(Item.collection().aggregate(pipeline))
+        
+        if similar_items:
+            category_counts = {}
+            for similar_item in similar_items:
+                category = similar_item.get("category")
+                if category:
+                    category_counts[category] = category_counts.get(category, 0) + 1
             
-    logger.info("Finished categorizing Maxima items based on Rimi items using fuzzy matching.")
+            if category_counts:
+                best_category = max(category_counts.items(), key=lambda x: x[1])[0]
+                if item.get("category") != best_category:
+                    Item.update(item["_id"], {"category": best_category})
+                    logger.info(f"Categorized '{item['name']}' as '{best_category}' using similar items "
+                              f"(Found in {category_counts[best_category]} of {len(similar_items)} similar items)")
+    
+    logger.info("Finished categorizing Maxima items.")
 
 if __name__ == "__main__":
     from app import create_app

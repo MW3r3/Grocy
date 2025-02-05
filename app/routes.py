@@ -2,7 +2,7 @@
 Routes module for the Flask application.
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, copy_current_request_context
+from flask import Blueprint, render_template, request, redirect, url_for, copy_current_request_context, current_app
 from datetime import datetime
 from .models import Item
 
@@ -131,3 +131,48 @@ def search():
     else:
         items = []
     return render_template("search_results_partial.html", items=items)
+
+@main.route("/remove_duplicates")
+def remove_duplicates():
+    """
+    Route for removing duplicate items.
+    """
+    from threading import Thread
+    
+    @copy_current_request_context
+    def run_cleanup():
+        # Get all items grouped by product_id and store
+        pipeline = [
+            {
+                "$group": {
+                    "_id": {
+                        "product_id": "$product_id",
+                        "store": "$store"
+                    },
+                    "items": {"$push": "$$ROOT"},
+                    "count": {"$sum": 1}
+                }
+            },
+            {
+                "$match": {
+                    "count": {"$gt": 1}
+                }
+            }
+        ]
+        
+        duplicates = Item.collection().aggregate(pipeline)
+        removed_count = 0
+        
+        for group in duplicates:
+            # Sort by update time and keep the most recent
+            items = sorted(group["items"], key=lambda x: x["time"]["updated"], reverse=True)
+            # Keep the first (most recent) item and remove others
+            for item in items[1:]:
+                Item.delete(item["_id"])
+                removed_count += 1
+        
+        app = current_app._get_current_object() 
+        app.logger.info(f"Removed {removed_count} duplicate items")
+
+    Thread(target=run_cleanup).start()
+    return redirect(url_for("main.index"))
