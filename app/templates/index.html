@@ -5,33 +5,22 @@
 
 {% block content %}
 <p>Total Items: {{ total_items }}</p>
-<h2>Fuzzy Search Items</h2>
+
+<!-- New button to delete all items -->
+<form action="{{ url_for('main.delete_all') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete all items?');">
+    <button type="submit">Delete All Items</button>
+</form>
+
+<!-- Single search form -->
+<h2>Search Items</h2>
 <form id="search-form">
     <input type="text" id="search-query" placeholder="Search for items..." required>
     <button type="submit">Search</button>
 </form>
-
 <div id="search-results"></div>
-
-<!-- New FTS search form -->
-<h2>Full-Text Search Items</h2>
-<form id="fts-search-form">
-    <input type="text" id="fts-search-query" placeholder="FTS search for items..." required>
-    <button type="submit">Search FTS</button>
-</form>
-<div id="fts-search-results"></div>
-
-<!-- New combined search form -->
-<h2>Combined Search Items</h2>
-<form id="combined-search-form">
-    <input type="text" id="combined-search-query" placeholder="Combined search for items..." required>
-    <button type="submit">Search Combined</button>
-</form>
-<div id="combined-search-results"></div>
 
 <h2>Scrape Price Data</h2>
 <a href="{{ url_for('main.scrape') }}">Scrape Price Data from Maxima</a>
-<!-- New link for Rimi scraping -->
 <a href="{{ url_for('main.scrape_rimi') }}">Scrape Price Data from Rimi</a>
 
 <script>
@@ -42,28 +31,6 @@ document.getElementById('search-form').addEventListener('submit', function(event
         .then(response => response.text())
         .then(data => {
             document.getElementById('search-results').innerHTML = data;
-        });
-});
-
-// New FTS search handler
-document.getElementById('fts-search-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const query = document.getElementById('fts-search-query').value;
-    fetch(`{{ url_for('main.fts_search') }}?query=${query}`)
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('fts-search-results').innerHTML = data;
-        });
-});
-
-// New combined search handler
-document.getElementById('combined-search-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const query = document.getElementById('combined-search-query').value;
-    fetch(`{{ url_for('main.combined_search') }}?query=${query}`)
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('combined-search-results').innerHTML = data;
         });
 });
 </script>

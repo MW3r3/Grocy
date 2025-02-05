@@ -1,23 +1,22 @@
 """
-Module for scraping discount booklets from grocery stores.
+Module for scraping item prices from grocery stores.
 """
 
 import os
 import time
 import re
 from datetime import datetime
-import sqlite3
 import logging
 import requests
 from bs4 import BeautifulSoup
-from flask_sqlalchemy import SQLAlchemy
-from app.models import db, Item
+from app.models import Item
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def parse_maxima_sales():
+    store = "MAXIMA"
     """
     Parses sales data from maxima.lv and inserts it into the database.
     """
@@ -36,37 +35,27 @@ def parse_maxima_sales():
     items = soup.find_all('div', class_='item')
 
     for item in items:
-        # Ignore items with the class 'offer-2-l-pd-sku-lidz'
-        if 'offer-2-l-pd-sku-lidz' in item.get('class', []):
-            continue
-
-        # Ignore items that contain a div with the class 'discount percents'
-        if item.find('div', class_='discount percents'):
+        # Cache frequently used element lookups
+        classes = item.get('class', [])
+        if 'offer-2-l-pd-sku-lidz' in classes or item.find('div', class_='discount percents'):
             continue
 
         product_id = item.get('data-product-id')
-        
-        # Check if the item already exists in the database (vendor specific)
-        existing_item = Item.query.filter_by(product_id=product_id, vendor='Maxima').first()
-        if existing_item:
-            logger.info("Item with product_id %s already exists for Maxima, skipping.", product_id)
+        existing_item = Item.collection().find_one({"product_id": product_id, "store": store})
+
+        # Cache title extraction
+        title_elem = item.find('div', class_='title')
+        if not title_elem:
             continue
-
-        title = item.find('div', class_='title').text.strip()
-
-        # Extract unit and quantity from the title
-        quantity = None
-        unit = None
-        match = re.search(r'(\d+)\s*(gab.|kg|ml|l|g)', title, re.IGNORECASE)
+        title = title_elem.text.strip()
+        
+        search_name = re.sub(r'\b[A-Z]{2,}\b', '', title.split(',')[0]).strip().lower()
+        match = re.search(r'\b(?:[A-Z]{2,}(?:\s+[A-Z]{2,})+)\b', title)
         if match:
-            quantity = int(match.group(1))
-            unit = match.group(2).lower()
-            if unit == 'kg':
-                quantity *= 1000
-                unit = 'g'
-            elif unit == 'l':
-                quantity *= 1000
-                unit = 'ml'
+            brand = match.group().strip()
+        else:
+            match = re.search(r'\b[A-Z]{2,}\b', title)
+            brand = match.group().strip() if match else store
 
         price_element = item.find('div', class_='t1')
         if price_element:
@@ -75,42 +64,39 @@ def parse_maxima_sales():
             price = float(f"{value}.{cents}")
         else:
             price = 0.0
-
-
-        discount = 0.0
-        try:
-            details_inner = item.find('div', class_='card__details').find('div', class_='card__details-inner')
-            discount_div = details_inner.find('div', class_='-has-discount')
-            container = discount_div.find('div', class_='old-price-tag') or discount_div.find('div', class_='card__old-price')
-            span = container.find('span')
-            old_price = float(span.text.replace('€', '').replace(',', '.'))
+            
+        old_price_element = item.find('div', class_='t2')
+        if old_price_element:
+            old_value = old_price_element.find('span', class_='value').text.strip()
+            old_price = float(old_value.replace(',', '.'))
+            
+        if old_price:
             discount = round((old_price - price) / old_price * 100)
-        except (AttributeError, ValueError):
-            discount = 0.0
-
-        # New extraction of unit price to update unit and quantity
-        p_price_per = item.find('p', class_='card__price-per')
-        if p_price_per:
-            text = p_price_per.get_text(separator=" ", strip=True)
-            # Expected examples: "0,99 €/gab.", "1,99 €/kg" or "1,50 €/l"
-            unit_price_match = re.search(r'([\d,]+)\s*€\s*/\s*([^\s]+)', text)
-            if unit_price_match:
-                try:
-                    unit_price = float(unit_price_match.group(1).replace(',', '.'))
-                    extracted_unit = unit_price_match.group(2).lower()
-                    if unit_price > 0:
-                        calc_qty = price / unit_price
-                        if extracted_unit == 'kg':
-                            quantity = round(calc_qty * 1000, 2)
-                            unit = 'g'
-                        elif extracted_unit in ['l', 'lt', 'litre', 'liter']:
-                            quantity = round(calc_qty * 1000, 2)
-                            unit = 'ml'
-                        else:
-                            quantity = round(calc_qty, 2)
-                            unit = extracted_unit
-                except ValueError:
-                    pass
+        
+        try:
+            unit_price_text = item.find('div', class_='t1 with_unit_price').find('span', class_='unit-price').text.strip()
+            unit = unit_price_text.split('/')[-1].strip()
+            unit_price = unit_price_text.split('')[0].strip()
+            quantity = round(price / unit_price, 2)
+            if unit == 'kg':
+                quantity *= 1000
+                unit = 'g'
+            elif unit == 'l':
+                quantity *= 1000
+                unit = 'ml'
+        except:
+            quantity = None
+            unit = None
+            match = re.search(r'(\d+)\s*(gab.|kg|ml|l|g)', title, re.IGNORECASE)
+            if match:
+                quantity = int(match.group(1))
+                unit = match.group(2).lower()
+                if unit == 'kg':
+                    quantity *= 1000
+                    unit = 'g'
+                elif unit == 'l':
+                    quantity *= 1000
+                    unit = 'ml'
 
         # Extract deadline from data-dates-interval attribute
         dates_interval = item.get('data-dates-interval')
@@ -123,21 +109,66 @@ def parse_maxima_sales():
         # TODO: Implement categorization based on title or other criteria
         category = None
 
-        new_item = Item(
-            name=title,
-            price=price,
-            quantity=quantity,
-            unit=unit,
-            discount=discount,
-            vendor='Maxima',
-            deadline=valid_to,
-            category=category,
-            product_id=product_id
-        )
-        db.session.add(new_item)
+        # Build document based on dbschema.json structure
+        now = datetime.utcnow()
+        new_item = {
+            "name": title,
+            "product_id": product_id,
+            "description": "",
+            "search_name": search_name,
+            "image_url": "",
+            "store": store,
+            "category": category,
+            "stock": True,
+            "unit": unit,
+            "quantity": quantity,
+            "brand": brand,
+            "price": {
+                "value": price,
+                "old_value": old_price if old_price is not None else price,
+                "discount": discount,
+                "currency": "EUR",
+                "price_per_unit": (
+                    round(price * 1000 / quantity, 2) if quantity and quantity != 0 and unit in ['g', 'ml']
+                    else (round(price / quantity, 2) if quantity and quantity != 0 else 0)
+                )
+            },
+            "time": {
+                "created": now,
+                "updated": now,
+                "discount_deadline": valid_to
+            }
+        }
+        if existing_item:
+            new_item["time"]["created"] = existing_item["time"]["created"]
+            def build_diff(new_doc, existing_doc):
+                diff = {}
+                for key, value in new_doc.items():
+                    if key == "time":
+                        existing_time = existing_doc.get("time", {})
+                        time_diff = {}
+                        for subkey, subvalue in value.items():
+                            if subkey == "updated":
+                                continue
+                            if existing_time.get(subkey) != subvalue:
+                                time_diff[subkey] = subvalue
+                        if time_diff:
+                            time_diff["updated"] = value["updated"]
+                            diff["time"] = time_diff
+                    else:
+                        if existing_doc.get(key) != value:
+                            diff[key] = value
+                return diff
 
-    db.session.commit()
-    
+            diff = build_diff(new_item, existing_item)
+            if diff:
+                Item.update(existing_item["_id"], diff)
+                logger.info("Updated existing item with product_id %s", product_id)
+            else:
+                logger.info("No changes for product_id %s, skipping update", product_id)
+        else:
+            Item.create(new_item)
+
 def parse_rimi_sales():
     """
     Parses sales data from rimi.lv and inserts it into the database.
@@ -182,9 +213,7 @@ def parse_rimi_sales():
                     continue
 
                 product_id = product_div.get('data-product-code') or product_div.get('data-gtms-product-id')
-                if Item.query.filter_by(product_id=product_id, vendor='Rimi').first():
-                    logger.info("Item with product_id %s already exists for Rimi, skipping.", product_id)
-                    continue
+                existing_item = Item.collection().find_one({"product_id": product_id, "store": "Rimi"})
 
                 title = product_div.get("data-gtms-banner-title")
                 if not title:
@@ -246,20 +275,45 @@ def parse_rimi_sales():
                                 unit_from_counter = m.group(2).strip()
                 final_unit = unit_from_counter if unit_from_counter else unit_from_price
 
-                new_item = Item(
-                    name=title,
-                    price=price,
-                    quantity=quantity,
-                    unit=final_unit,
-                    discount=discount,
-                    vendor='Rimi',
-                    deadline=None,
-                    category=category,
-                    product_id=product_id
-                )
-                db.session.add(new_item)
+                now = datetime.utcnow()
+                new_item = {
+                    "name": title,
+                    "product_id": product_id,
+                    "description": "",
+                    "search_name": title.lower(),
+                    "image_url": "",
+                    "store": "Rimi",
+                    "category": category,
+                    "stock": 0,
+                    "unit": final_unit,
+                    "quantity": quantity,
+                    "price": {
+                        "value": price,
+                        "old_value": old_price if old_price is not None else price,
+                        "discount": discount,
+                        "currency": "EUR",
+                        "price_per_unit": (
+                            round(price * 1000 / quantity, 2) if quantity and quantity != 0 and final_unit in ['g', 'ml']
+                            else (round(price / quantity, 2) if quantity and quantity != 0 else 0)
+                        )
+                    },
+                    "time": {
+                        "created": now,
+                        "updated": now,
+                        "discount_deadline": None
+                    }
+                }
+                if existing_item:
+                    new_item["time"]["created"] = existing_item["time"]["created"]
+                    diff = build_diff(new_item, existing_item)
+                    if diff:
+                        Item.update(existing_item["_id"], diff)
+                        logger.info("Updated existing item with product_id %s", product_id)
+                    else:
+                        logger.info("No changes for product_id %s, skipping update", product_id)
+                else:
+                    Item.create(new_item)
 
-            db.session.commit()
             if len(li_items) < 100:
                 break
             currentPage += 1

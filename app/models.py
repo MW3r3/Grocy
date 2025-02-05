@@ -2,116 +2,75 @@
 Models module for the Flask application.
 """
 
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func
-from thefuzz import fuzz
-from thefuzz import process  # Add this import with thefuzz imports
+import os
+import json
+from flask import current_app
+from bson.objectid import ObjectId
 
-db = SQLAlchemy()
+schema_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'dbschema.json')
+with open(schema_path, 'r') as f:
+    DBSCHEMA = json.load(f)
 
-class Item(db.Model):
-    """
-    Model for items in the database.
-    """
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(100), nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    quantity = db.Column(db.Integer, nullable=False, default=0)
-    discount = db.Column(db.Float, nullable=True, default=0.0)
-    vendor = db.Column(db.String(100), nullable=True)
-    category = db.Column(db.String(50), nullable=True)
-    deadline = db.Column(db.DateTime, nullable=True)
-    unit = db.Column(db.String(20), nullable=True)
-    product_id = db.Column(db.String(20), nullable=True)
-    created_at = db.Column(db.DateTime, server_default=func.now())
-    updated_at = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
-
-    def __repr__(self):
-        return f"<Item {self.name}>"
+class Item:
+    @staticmethod
+    def collection():
+        mongo = current_app.extensions.get("pymongo")
+        if not mongo:
+            mongo = getattr(current_app, "mongo", None)
+        if not mongo:
+            raise Exception("PyMongo extension not attached to current_app")
+        return mongo.db.items
 
     @classmethod
     def get_all(cls):
-        """Return all items."""
-        return cls.query.all()
+        return list(cls.collection().find())
 
     @classmethod
     def get_by_id(cls, item_id):
-        """Return a single item by id."""
-        return cls.query.get(item_id)
+        return cls.collection().find_one({"_id": ObjectId(item_id)})
 
     @classmethod
-    def create(cls, **kwargs):
-        """Create a new item with given fields."""
-        new_item = cls(**kwargs)
-        db.session.add(new_item)
-        db.session.commit()
-        return new_item
+    def create(cls, data):
+        result = cls.collection().insert_one(data)
+        data["_id"] = result.inserted_id
+        return data
 
     @classmethod
-    def update(cls, item_id, **kwargs):
-        """Update an existing item with provided fields."""
-        item = cls.get_by_id(item_id)
-        if item:
-            for key, value in kwargs.items():
-                setattr(item, key, value)
-            db.session.commit()
-        return item
+    def update(cls, item_id, data):
+        update_doc = {
+            "$set": data,
+            "$currentDate": {"time.updated": True}
+        }
+        cls.collection().update_one({"_id": ObjectId(item_id)}, update_doc)
+        return cls.get_by_id(item_id)
 
     @classmethod
     def delete(cls, item_id):
-        """Delete an item by id."""
-        item = cls.get_by_id(item_id)
-        if item:
-            db.session.delete(item)
-            db.session.commit()
-        return item
+        return cls.collection().delete_one({"_id": ObjectId(item_id)})
 
     @classmethod
     def search_by_name(cls, search_term):
-        """Search for items by name."""
-        return (
-            cls.query.filter(cls.name.ilike(f"%{search_term}%"))
-            .order_by(func.length(cls.name))
-            .all()
-        )
+        return list(cls.collection().find({"name": {"$regex": search_term, "$options": "i"}}))
 
     @classmethod
-    def fuzzy_search_by_name(cls, search_term, threshold=30, limit=10):
-        """Fuzzy search for items by name using thefuzz process.extractBests."""
-        candidates = cls.query.all()
-        # Build mapping from name to list of items (in case of duplicates)
-        name_to_items = {}
-        for item in candidates:
-            name_to_items.setdefault(item.name, []).append(item)
-        # Extract best matching names using process.extractBests
-        results = process.extractBests(search_term, list(name_to_items.keys()),
-                                       scorer=fuzz.ratio, score_cutoff=threshold, limit=limit)
-        # Flatten items from matched names preserving order by score
-        final_items = []
-        for match_name, score in results:
-            final_items.extend(name_to_items[match_name])
-        return final_items
+    def init_collection(cls):
+        mongo = getattr(current_app, "mongo", None)
+        if not mongo:
+            current_app.logger.error("PyMongo not initialized")
+            return
+        db = mongo.db
+        if db is None:
+            current_app.logger.error("MongoDB database not available")
+            return
+        try:
+            colls = db.list_collection_names()
+        except Exception as e:
+            current_app.logger.error("Error listing collections: %s", e)
+            return
+        if "items" in colls:
+            current_app.logger.info("Collection 'items' already exists. Skipping creation.")
+        else:
+            db.create_collection("items", validator={"$jsonSchema": DBSCHEMA})
+            current_app.logger.info("Created collection 'items' with schema validation.")
 
-    @classmethod
-    def fts_search_by_name(cls, search_term):
-        """Full-text search for items by name using SQLite FTS5.
-           Ensure that the SQLite FTS virtual table 'items_fts' is set up
-           and kept in sync with the item table."""
-        query = "SELECT rowid FROM items_fts WHERE items_fts MATCH ?"
-        result = db.engine.execute(query, (search_term,)).fetchall()
-        ids = [row[0] for row in result]
-        return cls.query.filter(cls.id.in_(ids)).all()
 
-    @classmethod
-    def combined_search_by_name_precise(cls, search_term, fuzzy_threshold=30, fuzzy_limit=10):
-        """Combined FTS and fuzzy search with ranking for more accurate results."""
-        fts_results = set(cls.fts_search_by_name(search_term))
-        fuzzy_results = set(cls.fuzzy_search_by_name(search_term, threshold=fuzzy_threshold, limit=fuzzy_limit))
-        # Take union of both result sets.
-        combined_set = fts_results.union(fuzzy_results)
-        # Score each candidate using fuzz.ratio.
-        ranked = [(item, fuzz.ratio(search_term.lower(), item.name.lower())) for item in combined_set]
-        # Sort candidates by descending score.
-        ranked_sorted = sorted(ranked, key=lambda x: x[1], reverse=True)
-        # Return sorted list of items.
-        return [item for item, score in ranked_sorted]

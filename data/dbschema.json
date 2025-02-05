@@ -1,0 +1,26 @@
+{
+    "_id": "id",
+    "product_id": "product_id",
+    "name": "name",
+    "description": "description",
+    "search_name": "search_name",
+    "image_url": "image",
+    "store": "store",
+    "category": "category",
+    "stock": "stock",
+    "unit": "unit",
+    "quantity": "quantity",
+    "brand": "brand",
+    "price": {
+        "value": 0.0,
+        "old_value": 0.0,
+        "discount": 0,
+        "currency": "EUR",
+        "price_per_unit": 0.0
+    },
+    "time": {
+        "created": "created",
+        "updated": "updated",
+        "discount_deadline": "discount_deadline"
+    }
+}
