@@ -80,7 +80,7 @@ def upload_image_to_imgbb(image_data, api_key=None, name=""):
     if not api_key:
         raise ValueError("IMGBB_API_KEY not found in environment variables")
     
-    endpoint = f"https://api.imgbb.com/1/upload?expiration=600&key={api_key}"
+    endpoint = f"https://api.imgbb.com/1/upload?expiration=604800&key={api_key}"
     
     # If image_data is a URL, pass it directly without downloading
     if isinstance(image_data, str) and image_data.startswith("http"):
