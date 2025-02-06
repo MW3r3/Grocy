@@ -147,12 +147,32 @@ def search():
     Route for fuzzy searching items with filters.
     """
     query = request.args.get("query", "")
+    lang = request.args.get("lang", "english").lower()
+    if query and lang == "english":
+        try:
+            import os
+            from google.cloud import translate_v2 as translate
+
+            # Set up translation client
+            os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/melihbulut/Grocy/keys/grocy-416211-959710a9980e.json'
+            translate_client = translate.Client()
+
+            # Translate the query
+            translation = translate_client.translate(
+                query,
+                target_language="lv",
+            )
+            query = translation["translatedText"]
+        except Exception as e:
+            current_app.logger.error(f"Translation failed: {e}")
+            # Optionally, set a flag or message to inform the user
+            translation_failed = True
+
     if query:
         filters = {
             'category': request.args.get('category'),
             'stock': request.args.get('stock') == 'true',
         }
-        
         # Add quantity filters if provided
         min_qty = request.args.get('min_quantity')
         max_qty = request.args.get('max_quantity')
@@ -160,10 +180,8 @@ def search():
             filters['min_quantity'] = float(min_qty)
         if max_qty and max_qty.isdigit():
             filters['max_quantity'] = float(max_qty)
-
         # Remove empty filters
         filters = {k: v for k, v in filters.items() if v is not None and v != ''}
-        
         items = Item.search_by_name(query, filters)
     else:
         items = []
