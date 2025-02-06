@@ -14,9 +14,11 @@ Flask-Migrate==3.1.0
 Flask-PyMongo==3.0.1
 Flask-SQLAlchemy==2.5.1
 fuzzywuzzy==0.18.0
+googletrans
+httpx==0.21.1
 gunicorn==20.1.0
-h11==0.14.0
-idna==3.10
+h11
+idna
 iniconfig==2.0.0
 isort==6.0.0
 itsdangerous==2.2.0
@@ -51,3 +53,4 @@ urllib3==2.3.0
 websocket-client==1.8.0
 Werkzeug
 wsproto==1.2.0
+python-Levenshtein

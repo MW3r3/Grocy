@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 from app.models import Item
 import threading
 from fuzzywuzzy import fuzz
+import base64
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -36,15 +37,86 @@ def build_diff(new_doc, existing_doc):
                 diff[key] = value
     return diff
 
+def scrape_img(element, store=""):
+    """
+    Helper function to extract the src URL from an <img> element within the given element.
+    Returns the URL if found, otherwise None.
+    """
+    if not element:
+        logger.warning("No element provided for image scraping")
+        return None
+    img_element = element.find('div', class_='img')
+    if not img_element:
+        logger.warning("No 'div.img' found in the element: %s", element)
+        return None
+    img = img_element.find('img')
+    img_url_relative = img['src'] if img and img.has_attr('src') else None
+    if not img_url_relative:
+        logger.warning("No 'src' attribute found for image in element: %s", element)
+        return None
+    
+    if ".png" in img_url_relative:
+        img_url_relative = img_url_relative.split(".png")[0] + ".png"
+        logger.info("Truncated image URL to: %s", img_url_relative)
+    else:
+        logger.warning("'.png' not found in image URL: %s", img_url_relative)
+    if store == "Rimi":
+        return img_url_relative
+    elif store == "Maxima":
+        full_url = f"https://www.maxima.lv{img_url_relative}"
+        logger.info("Full image URL for Maxima (truncated): %s", full_url)
+        return full_url
+    return img_url_relative
+
+def upload_image_to_imgbb(image_data, api_key=None, name=""):
+    """
+    Uploads the image to imgbb with an expiration of 600 seconds.
+    If image_data is a URL (string starting with http), passes it directly.
+    Otherwise, assumes image_data is raw bytes and encodes it.
+    Returns the image URL on success, otherwise None.
+    """
+    if not api_key:
+        api_key = os.environ.get("IMGBB_API_KEY")
+    if not api_key:
+        raise ValueError("IMGBB_API_KEY not found in environment variables")
+    
+    endpoint = f"https://api.imgbb.com/1/upload?expiration=600&key={api_key}"
+    
+    # If image_data is a URL, pass it directly without downloading
+    if isinstance(image_data, str) and image_data.startswith("http"):
+        payload = {
+            "name": name,
+            "image": image_data
+        }
+        logger.info("Uploading image via URL: %s", image_data)
+    else:
+        encoded_image = base64.b64encode(image_data).decode('utf-8')
+        payload = {
+            "name": name,
+            "image": encoded_image
+        }
+        logger.info("Uploading image as base64-encoded data")
+    
+    response = requests.post(endpoint, data=payload)
+    if response.status_code == 200:
+        result = response.json()
+        uploaded_url = result['data'].get('url')
+        logger.info("Image uploaded successfully: %s", uploaded_url)
+        return uploaded_url
+    else:
+        logger.error("Failed to upload image '%s'. Status: %s; Response: %s",
+                     name, response.status_code, response.text)
+    return None
+
 def parse_maxima_sales():
-    store = "MAXIMA"
+    store = "Maxima"
     """
     Parses sales data from maxima.lv and inserts it into the database.
     """
     url = "https://www.maxima.lv/ajax/salesloadmore?sort_by=newest&limit=2000&search="
     try:
-        response = requests.get(url, timeout=10)  # Add timeout parameter
-        response.raise_for_status()  # Raise an exception for HTTP errors
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
     except requests.exceptions.Timeout:
         logger.error("Request to %s timed out", url)
         return
@@ -56,13 +128,17 @@ def parse_maxima_sales():
     items = soup.find_all('div', class_='item')
 
     for item in items:
-        # Cache frequently used element lookups
         classes = item.get('class', [])
         if 'offer-2-l-pd-sku-lidz' in classes or item.find('div', class_='discount percents'):
             continue
 
         product_id = item.get('data-product-id')
         existing_item = Item.collection().find_one({"product_id": product_id, "store": store})
+
+        # Extract Image URL and upload to imgbb
+        name=product_id+"@"+store
+        img = scrape_img(item, store)
+        img_url = upload_image_to_imgbb(img, name=name) if img else None
 
         # Cache title extraction
         title_elem = item.find('div', class_='title')
@@ -141,7 +217,7 @@ def parse_maxima_sales():
             "product_id": product_id,
             "description": "",
             "search_name": search_name,
-            "image_url": "",
+            "image_url": img_url,
             "store": store,
             "category": category,
             "stock": True,
@@ -170,8 +246,8 @@ def parse_maxima_sales():
         elif unit == 'l':
             new_item['quantity'] *= 1000
             new_item['unit'] = 'ml'
-        logger.info("Parsed MAXIMA item: product_id=%s, title=%s, price=%s, quantity=%s, discount=%s, unit=%s",
-                    product_id, title, price, quantity, discount, unit)
+        #logger.info("Parsed MAXIMA item: product_id=%s, title=%s, price=%s, quantity=%s, discount=%s, unit=%s",
+        #            product_id, title, price, quantity, discount, unit)
         if existing_item:
             new_item["time"]["created"] = existing_item["time"]["created"]
             def build_diff(new_doc, existing_doc):
@@ -219,6 +295,7 @@ def parse_rimi_sales():
         from app import create_app
         app = create_app()
         with app.app_context():
+            store = "Rimi"
             currentPage = 1
             while True:
                 parsed = urlparse(base_url)
@@ -250,6 +327,20 @@ def parse_rimi_sales():
                     product_id = product_div.get('data-product-code') or product_div.get('data-gtms-product-id')
                     existing_item = Item.collection().find_one({"product_id": product_id, "store": "Rimi"})
 
+                    name = product_id + "@" + store
+                    # Threading for image upload
+                    img = scrape_img(product_div, store)
+                    if img:
+                        result_container = {}
+                        thread = threading.Thread(
+                            target=lambda: result_container.update({"result": upload_image_to_imgbb(img, name=name)})
+                        )
+                        thread.start()
+                        thread.join()
+                        img_url = result_container.get("result", "")
+                    else:
+                        img_url = ""
+                    
                     title = product_div.get("data-gtms-banner-title")
                     if not title:
                         name_elem = li.find('p', class_='card__name')
@@ -299,15 +390,19 @@ def parse_rimi_sales():
                     else:
                         quantity = None
                     stock = True if price_per_unit else False
-
+                    
+                    # Title filtering for search_name: split title at commas and any digit
+                    import re
+                    search_name = re.split(r'[,0-9]', title)[0].strip().lower()
+                
                     now = datetime.utcnow()
                     new_item = {
                         "name": title,
                         "product_id": product_id,
                         "description": "",
-                        "search_name": title.lower(),
-                        "image_url": "",
-                        "store": "Rimi",
+                        "search_name": search_name,
+                        "image_url": img_url,
+                        "store": store,
                         "category": category,
                         "stock": stock,
                         "unit": unit,

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- ...existing code... -->
+</head>
+<body>
+    <h1>Search Results for "{{ query }}"</h1>
+    <a href="{{ url_for('admin.index') }}">Back to Admin</a>
+    {% if items %}
+      <ul>
+      {% for item in items %}
+        <li>{{ item.name }} (ID: {{ item.product_id }})</li>
+      {% endfor %}
+      </ul>
+    {% else %}
+      <p>No items found.</p>
+    {% endif %}
+</body>
+</html>

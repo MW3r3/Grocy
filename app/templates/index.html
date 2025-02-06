@@ -39,6 +39,11 @@
                     <option value="{{ store }}">{{ store }}</option>
                     {% endfor %}
                 </select>
+                <!-- Add language selection -->
+                <select id="language" class="filter-select">
+                    <option value="english">English</option>
+                    <option value="latvian">Latvian</option>
+                </select>
             </div>
         </form>
     </div>
@@ -54,6 +59,7 @@
         const minQuantity = document.getElementById('min-quantity').value;
         const maxQuantity = document.getElementById('max-quantity').value;
         const store = document.getElementById('store-filter').value;
+        const language = document.getElementById('language').value;
 
         const filters = new URLSearchParams({
             query: query,
@@ -61,7 +67,8 @@
             stock: stock,
             min_quantity: minQuantity,
             max_quantity: maxQuantity,
-            store: store
+            store: store,
+            lang: language
         });
 
         fetch(`{{ url_for('main.search') }}?${filters.toString()}`)
