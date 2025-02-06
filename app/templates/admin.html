@@ -31,6 +31,10 @@
     <form method="post" action="{{ url_for('admin.categorize') }}">
         <button type="submit">Categorize Maxima Items</button>
     </form>
+    <!-- New button to upload images -->
+    <form method="post" action="{{ url_for('admin.upload_images') }}">
+        <button type="submit">Upload All Images</button>
+    </form>
     <a href="{{ url_for('main.remove_duplicates') }}" class="btn btn-primary">
         Remove Duplicates
     </a>

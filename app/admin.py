@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session
-from app.scraper import parse_maxima_sales, parse_rimi_sales, categorize_maxima_items
+from app.scraper import parse_maxima_sales, parse_rimi_sales, categorize_maxima_items, upload_all_images
 import os  
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin', template_folder='templates')
@@ -70,3 +70,15 @@ def search():
     else:
         items = []
     return render_template("admin_search.html", items=items, query=query)
+
+@admin_bp.route("/upload_images", methods=["POST"])
+def upload_images():
+    """
+    Route to upload images for all items.
+    """
+    try:
+        upload_all_images()
+        flash("Image upload completed successfully.", "success")
+    except Exception as e:
+        flash(f"Error during image upload: {e}", "error")
+    return redirect(url_for("admin.index"))

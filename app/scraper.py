@@ -138,7 +138,7 @@ def parse_maxima_sales():
         # Extract Image URL and upload to imgbb
         name=product_id+"@"+store
         img = scrape_img(item, store)
-        img_url = upload_image_to_imgbb(img, name=name) if img else None
+        img_url = img if img else None
 
         # Cache title extraction
         title_elem = item.find('div', class_='title')
@@ -246,8 +246,8 @@ def parse_maxima_sales():
         elif unit == 'l':
             new_item['quantity'] *= 1000
             new_item['unit'] = 'ml'
-        #logger.info("Parsed MAXIMA item: product_id=%s, title=%s, price=%s, quantity=%s, discount=%s, unit=%s",
-        #            product_id, title, price, quantity, discount, unit)
+        logger.info("Parsed MAXIMA item: product_id=%s, title=%s, price=%s, quantity=%s, discount=%s, unit=%s",
+                    product_id, title, price, quantity, discount, unit)
         if existing_item:
             new_item["time"]["created"] = existing_item["time"]["created"]
             def build_diff(new_doc, existing_doc):
@@ -328,18 +328,9 @@ def parse_rimi_sales():
                     existing_item = Item.collection().find_one({"product_id": product_id, "store": "Rimi"})
 
                     name = product_id + "@" + store
-                    # Threading for image upload
+                    # Removed threading for image upload:
                     img = scrape_img(product_div, store)
-                    if img:
-                        result_container = {}
-                        thread = threading.Thread(
-                            target=lambda: result_container.update({"result": upload_image_to_imgbb(img, name=name)})
-                        )
-                        thread.start()
-                        thread.join()
-                        img_url = result_container.get("result", "")
-                    else:
-                        img_url = ""
+                    img_url = img if img else ""
                     
                     title = product_div.get("data-gtms-banner-title")
                     if not title:
@@ -459,6 +450,26 @@ def parse_rimi_sales():
         thread.join()
 
     logger.info("Finished parsing Rimi sales data using threads.")
+
+def upload_all_images():
+    """
+    Iterates over items and uploads images (using imgbb) for items that haven't been processed yet.
+    """
+    from app.models import Item
+    logger.info("Starting to upload images for all items...")
+    items = Item.collection().find({"store": {"$in": ["Maxima", "Rimi"]}})
+    for item in items:
+        current_url = item.get("image_url")
+        # Skip if already uploaded (assume imgbb URLs contain 'imgbb.com')
+        if current_url and "imgbb.com" in current_url:
+            continue
+        if current_url:
+            name = item.get("product_id", "unknown") + "@" + item.get("store", "")
+            new_url = upload_image_to_imgbb(current_url, name=name)
+            if new_url:
+                Item.update(item["_id"], {"image_url": new_url})
+                logger.info("Updated image for item %s", item.get("product_id"))
+    logger.info("Finished uploading images for all items.")
 
 def load_category_keywords():
     """Load category keywords from file."""
