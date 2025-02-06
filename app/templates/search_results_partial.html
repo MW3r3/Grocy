@@ -3,6 +3,7 @@
         <table class="items-table">
             <thead>
                 <tr>
+                    <th>Image</th>
                     <th>Name</th>
                     <th>Store</th>
                     <th>Price</th>
@@ -25,6 +26,7 @@
                     <tr class="{% if item.price.discount > 0 %}has-discount{% endif %}" 
                         onclick='showItemDetails({{ item|tojson }})'
                         style="cursor: pointer;">
+                        <td><img src="{{ item.image_url }}" alt="{{ item.name }}" width="50"></td>
                         <td>{{ item.name }}</td>
                         <td>{{ item.store }}</td>
                         <td>€{{ "%.2f"|format(item.price.value) }}</td>

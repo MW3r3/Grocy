@@ -18,6 +18,7 @@ def create_app(config=None):
     Create and configure the Flask application.
     """
     app = Flask(__name__)
+    app.secret_key = os.environ.get("SECRET_KEY")
     
     # Get the absolute path to the certificate file
     cert_path = os.path.join(Path(__file__).parent.parent, 'isrgrootx1.pem')
@@ -44,5 +45,7 @@ def create_app(config=None):
         app.config.update(config)
 
     app.register_blueprint(main_blueprint)
+    from app.admin import admin_bp
+    app.register_blueprint(admin_bp)
 
     return app
