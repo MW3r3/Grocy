@@ -13,6 +13,7 @@ Flask
 Flask-Migrate==3.1.0
 Flask-PyMongo==3.0.1
 Flask-SQLAlchemy==2.5.1
+Flask-WTF
 fuzzywuzzy==0.18.0
 googletrans
 httpx==0.21.1

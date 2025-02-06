@@ -1,8 +1,17 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session
 from app.scraper import parse_maxima_sales, parse_rimi_sales, categorize_maxima_items, upload_all_images
-import os  
+import os
+from threading import Thread
+from flask import copy_current_request_context
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin', template_folder='templates')
+
+# Helper to run tasks in background threads with request context
+def run_in_background(task, *args, **kwargs):
+    @copy_current_request_context
+    def wrapper():
+        task(*args, **kwargs)
+    Thread(target=wrapper).start()
 
 @admin_bp.before_request
 def require_login():
@@ -34,8 +43,8 @@ def index():
 @admin_bp.route('/run_maxima', methods=['POST'])
 def run_maxima():
     try:
-        parse_maxima_sales()
-        flash("Maxima sales parsed successfully", "success")
+        run_in_background(parse_maxima_sales)
+        flash("Maxima sales parsing started in the background.", "success")
     except Exception as e:
         current_app.logger.error("Error in parsing Maxima sales: %s", e)
         flash("Error in parsing Maxima sales", "danger")
@@ -44,8 +53,8 @@ def run_maxima():
 @admin_bp.route('/run_rimi', methods=['POST'])
 def run_rimi():
     try:
-        parse_rimi_sales()
-        flash("Rimi sales parsed successfully", "success")
+        run_in_background(parse_rimi_sales)
+        flash("Rimi sales parsing started in the background.", "success")
     except Exception as e:
         current_app.logger.error("Error in parsing Rimi sales: %s", e)
         flash("Error in parsing Rimi sales", "danger")
@@ -54,8 +63,8 @@ def run_rimi():
 @admin_bp.route('/categorize', methods=['POST'])
 def categorize():
     try:
-        categorize_maxima_items()
-        flash("Categorized Maxima items successfully", "success")
+        run_in_background(categorize_maxima_items)
+        flash("Categorizing Maxima items started in the background.", "success")
     except Exception as e:
         current_app.logger.error("Error in categorizing Maxima items: %s", e)
         flash("Error in categorizing Maxima items", "danger")
@@ -77,8 +86,8 @@ def upload_images():
     Route to upload images for all items.
     """
     try:
-        upload_all_images()
-        flash("Image upload completed successfully.", "success")
+        run_in_background(upload_all_images)
+        flash("Image upload started in the background.", "success")
     except Exception as e:
         flash(f"Error during image upload: {e}", "error")
     return redirect(url_for("admin.index"))

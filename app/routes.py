@@ -5,6 +5,15 @@ Routes module for the Flask application.
 from flask import Blueprint, copy_current_request_context, redirect, render_template, request, current_app, url_for
 from datetime import datetime
 from .models import Item
+from threading import Thread
+from flask import copy_current_request_context
+
+# Helper to run tasks in background threads with request context
+def run_in_background(task, *args, **kwargs):
+    @copy_current_request_context
+    def wrapper():
+        task(*args, **kwargs)
+    Thread(target=wrapper).start()
 
 main = Blueprint("main", __name__)
 
@@ -53,7 +62,7 @@ def add():
     unit = request.form["unit"]
     data = {
         "name": name,
-        "product_id": "",  # no product_id provided via form
+        "product_id": "",
         "description": "",
         "search_name": name.lower(),
         "image_url": "",
@@ -99,15 +108,8 @@ def scrape():
     """
     Route for scraping sales data from Maxima.
     """
-    from threading import Thread
-    from flask import copy_current_request_context
     from .scraper import parse_maxima_sales
-
-    @copy_current_request_context
-    def run_scrape():
-        parse_maxima_sales()
-
-    Thread(target=run_scrape).start()
+    run_in_background(parse_maxima_sales)
     return redirect(url_for("main.index"))
 
 @main.route("/scrape_rimi", endpoint="scrape_rimi")
@@ -115,15 +117,8 @@ def scrape_rimi():
     """
     Route for scraping sales data from Rimi.
     """
-    from threading import Thread
-    from flask import copy_current_request_context
     from .scraper import parse_rimi_sales
-
-    @copy_current_request_context
-    def run_scrape():
-        parse_rimi_sales()
-
-    Thread(target=run_scrape).start()
+    run_in_background(parse_rimi_sales)
     return redirect(url_for("main.index"))
 
 @main.route("/categorize_maxima")
@@ -132,13 +127,7 @@ def categorize_maxima():
     Route for categorizing Maxima items based on Rimi items.
     """
     from .scraper import categorize_maxima_items
-    from threading import Thread
-
-    @copy_current_request_context
-    def run_categorize():
-        categorize_maxima_items()
-
-    Thread(target=run_categorize).start()
+    run_in_background(categorize_maxima_items)
     return redirect(url_for("main.index"))
 
 @main.route("/search")
@@ -192,9 +181,6 @@ def remove_duplicates():
     """
     Route for removing duplicate items.
     """
-    from threading import Thread
-    
-    @copy_current_request_context
     def run_cleanup():
         # Get all items grouped by product_id and store
         pipeline = [
@@ -228,6 +214,5 @@ def remove_duplicates():
         
         app = current_app._get_current_object() 
         app.logger.info(f"Removed {removed_count} duplicate items")
-
-    Thread(target=run_cleanup).start()
+    run_in_background(run_cleanup)
     return redirect(url_for("main.index"))

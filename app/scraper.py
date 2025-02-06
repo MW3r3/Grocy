@@ -5,7 +5,7 @@ Module for scraping item prices from grocery stores.
 import os
 import time
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import requests
 from bs4 import BeautifulSoup
@@ -206,12 +206,11 @@ def parse_maxima_sales():
             valid_to = datetime.strptime(end_date_str, '%d.%m.%Y')
         else:
             valid_to = None
-
-        # TODO: Implement categorization based on title or other criteria
+            
         category = None
 
         # Build document based on dbschema.json structure
-        now = datetime.utcnow()
+        now = datetime.astimezone(datetime.now(), timezone.utc)
         new_item = {
             "name": title,
             "product_id": product_id,
@@ -246,8 +245,8 @@ def parse_maxima_sales():
         elif unit == 'l':
             new_item['quantity'] *= 1000
             new_item['unit'] = 'ml'
-        logger.info("Parsed MAXIMA item: product_id=%s, title=%s, price=%s, quantity=%s, discount=%s, unit=%s",
-                    product_id, title, price, quantity, discount, unit)
+        # logger.info("Parsed MAXIMA item: product_id=%s, title=%s, price=%s, quantity=%s, discount=%s, unit=%s",
+        #             product_id, title, price, quantity, discount, unit)
         if existing_item:
             new_item["time"]["created"] = existing_item["time"]["created"]
             def build_diff(new_doc, existing_doc):
@@ -386,7 +385,7 @@ def parse_rimi_sales():
                     import re
                     search_name = re.split(r'[,0-9]', title)[0].strip().lower()
                 
-                    now = datetime.utcnow()
+                    now = datetime.astimezone(datetime.now(), timezone.utc)
                     new_item = {
                         "name": title,
                         "product_id": product_id,
